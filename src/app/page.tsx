@@ -5,8 +5,10 @@ import {
   getActiveCompetitionWeek,
 } from "@/lib/real-data-provider";
 import { cookies } from "next/headers";
-import { Trophy, Flame, Mountain, Zap, Award, Users, RotateCw, CheckCircle2 } from "lucide-react";
+import { Zap, Mountain, Flame, ArrowRight, Sparkles, Trophy, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { BillyMascot } from "@/components/billy-mascot";
+import { GameCard, GameButton } from "@/components/game-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +24,7 @@ export default async function HomePage() {
         loggedAthleteId = String(parsed.id);
       }
     } catch {
-      // Ignora erro de parse
+      // Ignora erro
     }
   }
 
@@ -31,135 +33,223 @@ export default async function HomePage() {
   const realGiroBulletin = getRealGiroBulletin();
   const activeCompetitionWeek = getActiveCompetitionWeek();
 
-  // Participantes da corrida baseados no ranking real semanal
-  const participants = rankings.distancePodium.length > 0
-    ? rankings.distancePodium.map((p) => ({
-        athleteId: p.athleteId,
-        athleteName: p.athleteName,
-        distanceKm: p.totalDistanceKm,
-      }))
-    : profile
-    ? [
-        {
-          athleteId: profile.athleteId,
-          athleteName: profile.fullName,
-          distanceKm: profile.seasonStats.totalDistanceKm,
-        },
-      ]
-    : [];
+  const participants =
+    rankings.distancePodium.length > 0
+      ? rankings.distancePodium.map((p) => ({
+          athleteId: p.athleteId,
+          athleteName: p.athleteName,
+          distanceKm: p.totalDistanceKm,
+        }))
+      : profile
+      ? [
+          {
+            athleteId: profile.athleteId,
+            athleteName: profile.fullName,
+            distanceKm: profile.seasonStats.totalDistanceKm,
+          },
+        ]
+      : [];
 
   const maxDistance = participants.length > 0 ? Math.max(...participants.map((p) => p.distanceKm)) : 0;
 
   return (
-    <div className="space-y-10">
-      {/* Athlete Header / Level Progression ou Estado Desconectado */}
+    <div className="space-y-8">
+      {/* Hero / Nível & Progresso do Usuário (estilo Duolingo) */}
       {profile ? (
-        <section className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur shadow-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              {profile.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.fullName}
-                  className="w-16 h-16 rounded-full border-2 border-amber-500/80 object-cover shadow-lg shadow-orange-500/20"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
-                  🚴‍♂️
+        <GameCard color="amber" className="relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="relative">
+                {profile.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.fullName}
+                    className="w-20 h-20 rounded-3xl border-4 border-white shadow-md object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-3xl bg-amber-400 border-4 border-white flex items-center justify-center text-4xl shadow-md">
+                    🚴
+                  </div>
+                )}
+                <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs font-black px-2 py-0.5 rounded-full border-2 border-white shadow-sm">
+                  Lvl {profile.levelInfo.level}
                 </div>
-              )}
+              </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-white">{profile.fullName}</h1>
-                  <span className="text-xs bg-amber-500/20 text-amber-300 font-semibold px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                  <h1 className="text-2xl font-black text-slate-900">{profile.fullName}</h1>
+                  <span className="bg-amber-200 text-amber-900 border border-amber-400/60 text-2xs font-extrabold px-2 py-0.5 rounded-xl uppercase tracking-wider">
                     {profile.levelInfo.tierName}
                   </span>
-                  <span className="text-2xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
-                    Strava Conectado
-                  </span>
                 </div>
-                <p className="text-sm text-slate-400">
-                  Nível {profile.levelInfo.level} • {profile.clubName}
+                <p className="text-xs font-bold text-amber-800/80 mt-1">
+                  {profile.clubName} • Temporada 2026
                 </p>
               </div>
             </div>
-            <div className="w-full sm:w-72 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
-              <div className="flex justify-between text-xs font-semibold mb-2">
-                <span className="text-slate-400">Progresso do Nível</span>
-                <span className="text-amber-400 font-mono font-bold">{profile.levelInfo.progressPercent}%</span>
+
+            {/* Barra de Progresso XP estilo Duolingo */}
+            <div className="w-full sm:w-80 bg-white/90 p-4 rounded-2xl border-2 border-amber-200 shadow-sm">
+              <div className="flex justify-between items-center text-xs font-black mb-1.5">
+                <span className="text-slate-600 uppercase tracking-wider">Energia de XP</span>
+                <span className="text-amber-600 font-mono">{profile.levelInfo.progressPercent}%</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-slate-100 rounded-full h-4 p-0.5 border border-slate-200 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-amber-400 to-orange-500 h-full rounded-full transition-all duration-700 shadow-inner"
                   style={{ width: `${profile.levelInfo.progressPercent}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[11px] text-slate-500 mt-2 font-mono">
-                <span>{profile.levelInfo.currentLevelXp.toLocaleString("pt-BR")} XP</span>
+              <div className="flex justify-between text-[11px] font-bold text-slate-400 mt-1.5 font-mono">
+                <span>{profile.totalXp.toLocaleString("pt-BR")} XP</span>
                 <span>{profile.levelInfo.nextLevelXp.toLocaleString("pt-BR")} XP</span>
               </div>
             </div>
           </div>
-        </section>
+        </GameCard>
       ) : (
-        <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center sm:text-left">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-              <Users className="w-3.5 h-3.5" />
-              Cabritos Race Team Hub
+        /* Onboarding Divertido com Bode Billy */
+        <GameCard color="amber" className="relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+              <BillyMascot mood="cheering" size="lg" />
+              <div className="space-y-1 max-w-lg">
+                <div className="inline-flex items-center gap-1 text-2xs font-black uppercase tracking-widest text-amber-700 bg-amber-200/80 px-2.5 py-1 rounded-full">
+                  <Sparkles className="w-3 h-3" />
+                  Temporada Ativa
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
+                  Bode Billy convoca o Pelotão!
+                </h1>
+                <p className="text-xs sm:text-sm font-semibold text-slate-600">
+                  Conecte seu Strava para ganhar XP, disputar a corrida semanal e colecionar medalhas no clube.
+                </p>
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">
-              Conecte seu Strava para Entrar no Pelotão
-            </h1>
-            <p className="text-sm text-slate-400 max-w-xl leading-relaxed">
-              Sincronize seus pedais, suba de nível com XP, desbloqueie badges exclusivas e dispute o pódio semanal da equipe.
-            </p>
+            <a href="/api/auth/strava">
+              <GameButton variant="primary" size="lg">
+                Começar o Jogo
+              </GameButton>
+            </a>
           </div>
-          <a
-            href="/api/auth/strava"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-6 py-3.5 rounded-2xl text-sm transition shadow-lg shadow-amber-500/20 shrink-0 cursor-pointer"
-          >
-            <RotateCw className="w-4 h-4" />
-            Conectar Strava
-          </a>
-        </section>
+        </GameCard>
       )}
 
-      {/* Corrida Virtual da Semana */}
-      <section id="corrida" className="space-y-4">
-        <div className="flex items-center justify-between">
+      {/* Grid Principal: Desafio da Semana & Mini-Giro */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Desafio Ativo da Semana (Duolingo Quest Card) */}
+        <GameCard color="emerald" className="md:col-span-2 flex flex-col justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              🏁 Corrida da Semana
-            </h2>
-            <p className="text-sm text-slate-400">
-              Estrada contínua aberta até domingo 23:59. Cada km pedalado move seu avatar!
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎯</span>
+                <h2 className="text-base font-black text-emerald-950 uppercase tracking-wide">
+                  Desafio da Semana
+                </h2>
+              </div>
+              <span className="text-xs font-black bg-emerald-200 text-emerald-900 px-3 py-1 rounded-full border border-emerald-300">
+                +300 XP
+              </span>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-900 mb-1">
+              Desafio Escalador das Cabras
+            </h3>
+            <p className="text-xs font-semibold text-emerald-800 mb-4 leading-relaxed">
+              Acumule pelo menos 1.000 metros de altimetria nos seus pedais até domingo às 23:59.
             </p>
+
+            <div className="space-y-1.5 mb-2">
+              <div className="flex justify-between text-xs font-black text-emerald-900">
+                <span>Progresso Coletivo</span>
+                <span>{Math.round(rankings.mountainPodium.reduce((acc, p) => acc + p.totalElevationMeters, 0))}m / 5.000m</span>
+              </div>
+              <div className="w-full bg-emerald-100 rounded-full h-3.5 p-0.5 border border-emerald-300 overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.round(
+                        (rankings.mountainPodium.reduce((acc, p) => acc + p.totalElevationMeters, 0) / 5000) *
+                          100
+                      )
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
           </div>
-          <span className="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-slate-400">
-            Ciclo #{activeCompetitionWeek.weekNumber} • Temporada {activeCompetitionWeek.year}
-          </span>
+
+          <div className="pt-4 border-t border-emerald-200/60 flex items-center justify-between">
+            <span className="text-2xs font-extrabold text-emerald-700 uppercase">
+              Ciclo #{activeCompetitionWeek.weekNumber}
+            </span>
+            <Link
+              href="/desafios"
+              className="inline-flex items-center gap-1 text-xs font-black text-emerald-900 hover:text-emerald-700"
+            >
+              Ver Todas as Missões <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </GameCard>
+
+        {/* Card Mascote Billy / Dica do Dia */}
+        <GameCard color="orange" className="flex flex-col items-center justify-center text-center p-6 space-y-3">
+          <BillyMascot mood="trophy" size="md" />
+          <h3 className="text-sm font-black text-orange-950 uppercase tracking-wide">
+            Recado do Billy
+          </h3>
+          <p className="text-xs font-bold text-orange-800 leading-relaxed">
+            &ldquo;Pedal leve ou montanha dura: cada km conta pro ranking do pelotão!&rdquo;
+          </p>
+          <Link href="/ranking">
+            <GameButton variant="secondary" size="sm" className="mt-2">
+              Ver Pódios
+            </GameButton>
+          </Link>
+        </GameCard>
+      </div>
+
+      {/* Pista da Corrida Virtual Semanal */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🏁</span>
+            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
+              Corrida da Semana
+            </h2>
+          </div>
+          <Link
+            href="/corrida"
+            className="text-xs font-black text-amber-600 hover:text-amber-700 flex items-center gap-1 uppercase tracking-wider"
+          >
+            Pista Completa <ChevronRight className="w-4 h-4" />
+          </Link>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-6">
+        <GameCard color="white" className="space-y-4">
           {participants.length > 0 ? (
-            participants.map((cyclist, idx) => {
-              const distKm = cyclist.distanceKm;
-              const progress = maxDistance > 0 ? (distKm / maxDistance) * 100 : 0;
+            participants.slice(0, 4).map((cyclist, idx) => {
+              const progress = maxDistance > 0 ? (cyclist.distanceKm / maxDistance) * 100 : 0;
               return (
-                <div key={cyclist.athleteId} className="space-y-2">
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="flex items-center gap-2">
-                      <span className="text-slate-500 font-mono w-4">{idx + 1}º</span>
-                      <span className="text-slate-200">{cyclist.athleteName}</span>
+                <div key={cyclist.athleteId} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs font-black">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-2xs text-slate-700">
+                        {idx + 1}
+                      </span>
+                      <span className="text-slate-900">{cyclist.athleteName}</span>
+                    </div>
+                    <span className="font-mono text-amber-600 font-extrabold">
+                      {cyclist.distanceKm} km
                     </span>
-                    <span className="font-mono text-amber-400 font-semibold">{distKm} km</span>
                   </div>
-                  <div className="relative w-full bg-slate-950 h-5 rounded-full overflow-hidden border border-slate-800/80">
+                  <div className="relative w-full bg-slate-100 h-6 rounded-full overflow-hidden border-2 border-slate-200">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-600 via-amber-500 to-orange-500 rounded-full transition-all duration-500 flex items-center justify-end pr-1"
-                      style={{ width: `${progress}%` }}
+                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-700 flex items-center justify-end pr-1.5"
+                      style={{ width: `${Math.max(8, progress)}%` }}
                     >
                       <span className="text-xs select-none">🚴</span>
                     </div>
@@ -168,107 +258,116 @@ export default async function HomePage() {
               );
             })
           ) : (
-            <p className="text-sm text-slate-500 text-center py-4">
-              Nenhum ciclista ativo na corrida desta semana. Conecte sua conta do Strava para começar!
-            </p>
+            <div className="text-center py-6 space-y-2">
+              <p className="text-xs font-bold text-slate-400">
+                Nenhum ciclista na estrada esta semana.
+              </p>
+              <a href="/api/auth/strava">
+                <GameButton variant="primary" size="sm">
+                  Entrar na Corrida
+                </GameButton>
+              </a>
+            </div>
           )}
+        </GameCard>
+      </section>
+
+      {/* Pódios Rápidos */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🏆</span>
+            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
+              Pódios da Semana
+            </h2>
+          </div>
+          <Link
+            href="/ranking"
+            className="text-xs font-black text-amber-600 hover:text-amber-700 flex items-center gap-1 uppercase tracking-wider"
+          >
+            Ver Todos os Rankings <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <GameCard color="amber" className="p-5">
+            <div className="flex items-center gap-2 mb-3 text-amber-700 font-black text-xs uppercase">
+              <Zap className="w-4 h-4" />
+              Rei da Distância
+            </div>
+            {rankings.distancePodium[0] ? (
+              <div>
+                <div className="text-base font-black text-slate-900">
+                  {rankings.distancePodium[0].athleteName}
+                </div>
+                <div className="text-xs font-black text-amber-600 mt-0.5 font-mono">
+                  {rankings.distancePodium[0].totalDistanceKm} km
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 font-bold">Aguardando pedais...</div>
+            )}
+          </GameCard>
+
+          <GameCard color="emerald" className="p-5">
+            <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-xs uppercase">
+              <Mountain className="w-4 h-4" />
+              Rei da Montanha
+            </div>
+            {rankings.mountainPodium[0] ? (
+              <div>
+                <div className="text-base font-black text-slate-900">
+                  {rankings.mountainPodium[0].athleteName}
+                </div>
+                <div className="text-xs font-black text-emerald-600 mt-0.5 font-mono">
+                  {rankings.mountainPodium[0].totalElevationMeters} m
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 font-bold">Aguardando pedais...</div>
+            )}
+          </GameCard>
+
+          <GameCard color="orange" className="p-5">
+            <div className="flex items-center gap-2 mb-3 text-orange-700 font-black text-xs uppercase">
+              <Flame className="w-4 h-4" />
+              Mais Consistente
+            </div>
+            {rankings.consistencyPodium[0] ? (
+              <div>
+                <div className="text-base font-black text-slate-900">
+                  {rankings.consistencyPodium[0].athleteName}
+                </div>
+                <div className="text-xs font-black text-orange-600 mt-0.5 font-mono">
+                  {rankings.consistencyPodium[0].distinctDays} dias
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 font-bold">Aguardando pedais...</div>
+            )}
+          </GameCard>
         </div>
       </section>
 
-      {/* Rankings do Clube */}
-      <section id="rankings" className="space-y-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          🏆 Rankings do Clube
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Rei da Distância */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-4 text-amber-400">
-              <Zap className="w-5 h-5" />
-              <h3 className="font-bold text-white">Rei da Distância</h3>
-            </div>
-            <div className="space-y-3">
-              {rankings.distancePodium.length > 0 ? (
-                rankings.distancePodium.slice(0, 3).map((podium, i) => (
-                  <div key={podium.athleteId} className="flex justify-between text-sm">
-                    <span className="text-slate-300">
-                      {i + 1}º {podium.athleteName}
-                    </span>
-                    <span className="font-mono font-semibold text-slate-100">{podium.totalDistanceKm} km</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-500">Sem atividades registradas na semana.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Rei da Montanha */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-4 text-emerald-400">
-              <Mountain className="w-5 h-5" />
-              <h3 className="font-bold text-white">Rei da Montanha</h3>
-            </div>
-            <div className="space-y-3">
-              {rankings.mountainPodium.length > 0 ? (
-                rankings.mountainPodium.slice(0, 3).map((podium, i) => (
-                  <div key={podium.athleteId} className="flex justify-between text-sm">
-                    <span className="text-slate-300">
-                      {i + 1}º {podium.athleteName}
-                    </span>
-                    <span className="font-mono font-semibold text-slate-100">{podium.totalElevationMeters} m</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-500">Sem altimetria registrada na semana.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Mais Consistente */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-4 text-orange-400">
-              <Flame className="w-5 h-5" />
-              <h3 className="font-bold text-white">Mais Consistente</h3>
-            </div>
-            <div className="space-y-3">
-              {rankings.consistencyPodium.length > 0 ? (
-                rankings.consistencyPodium.slice(0, 3).map((podium, i) => (
-                  <div key={podium.athleteId} className="flex justify-between text-sm">
-                    <span className="text-slate-300">
-                      {i + 1}º {podium.athleteName}
-                    </span>
-                    <span className="font-mono font-semibold text-slate-100">{podium.distinctDays} dias</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-500">Sem dias pedalados registrados.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Destaque do Giro da Semana */}
-      <section className="bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-950 border border-amber-500/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Boletim Semanal Giro */}
+      <GameCard color="blue" className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold uppercase text-amber-400 tracking-wider">
-            Giro da Semana • Edição #{realGiroBulletin.weekNumber}
+          <span className="text-2xs font-black uppercase tracking-wider text-blue-700 bg-blue-200 px-2 py-0.5 rounded-full">
+            Jornal do Pelotão • Edição #{realGiroBulletin.weekNumber}
           </span>
-          <h3 className="text-lg font-bold text-white mt-1">
+          <h3 className="text-base font-black text-slate-900 mt-1">
             {realGiroBulletin.summaryHeadline}
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
-            {realGiroBulletin.totalDistanceKm} km pedalados coletivamente e {realGiroBulletin.totalElevationMeters} m de altimetria!
+          <p className="text-xs font-bold text-blue-900/80 mt-0.5">
+            {realGiroBulletin.totalDistanceKm} km percorridos coletivamente pelo time!
           </p>
         </div>
-        <Link
-          href="/giro"
-          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition"
-        >
-          Ler Edição Completa
+        <Link href="/giro">
+          <GameButton variant="secondary" size="sm">
+            Ler Giro
+          </GameButton>
         </Link>
-      </section>
+      </GameCard>
     </div>
   );
 }
