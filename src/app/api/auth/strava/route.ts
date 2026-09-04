@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const authUrl = buildStravaAuthorizeUrl({
     clientId,
     redirectUri,
-    scope: "read,activity:read_all,profile:read_all",
+    scope: "read,activity:read",
   });
 
   return NextResponse.redirect(authUrl);
