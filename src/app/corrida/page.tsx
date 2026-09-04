@@ -60,14 +60,14 @@ export default async function CorridaPage() {
                   <div className="flex justify-between items-center text-xs font-black">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`w-6 h-6 rounded-xl flex items-center justify-center text-xs font-black border-b-2 ${
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shadow-xs ${
                           isLeader
-                            ? "bg-amber-400 border-amber-600 text-slate-950"
+                            ? "bg-amber-400 text-amber-950"
                             : idx === 1
-                            ? "bg-slate-200 border-slate-400 text-slate-800"
+                            ? "bg-slate-200 text-slate-800"
                             : idx === 2
-                            ? "bg-orange-200 border-orange-400 text-orange-900"
-                            : "bg-slate-100 border-slate-300 text-slate-600"
+                            ? "bg-orange-200 text-orange-950"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {idx + 1}
@@ -86,15 +86,15 @@ export default async function CorridaPage() {
 
                   {/* Faixa da pista com demarcações e avatar */}
                   <div className="relative w-full bg-slate-100 h-9 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner flex items-center">
-                    {/* Linhas de asfalto tracejadas no centro */}
-                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-b-2 border-dashed border-slate-200 pointer-events-none" />
+                    {/* Linhas de asfalto tracejadas no centro animadas */}
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-b-2 border-dashed border-slate-300/80 pointer-events-none motion-safe:animate-[pulse_2s_infinite]" />
 
                     {/* Barra de progresso vibrante com ciclista animado */}
                     <div
-                      className="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-2xl transition-all duration-700 flex items-center justify-end pr-2 shadow-md relative"
+                      className="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-2xl transition-all duration-1000 ease-out flex items-center justify-end pr-1.5 shadow-md relative"
                       style={{ width: `${Math.max(6, progress)}%` }}
                     >
-                      <div className="w-7 h-7 bg-white rounded-full border-2 border-amber-600 flex items-center justify-center text-sm shadow-sm select-none">
+                      <div className="w-7 h-7 bg-white rounded-full border-2 border-amber-600 flex items-center justify-center text-sm shadow-sm select-none motion-safe:hover:scale-110 transition-transform">
                         🚴
                       </div>
                     </div>

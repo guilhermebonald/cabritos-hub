@@ -5,6 +5,7 @@ import { BillyMascot } from "@/components/billy-mascot";
 import { Trophy, Award, Zap, Mountain, Clock, Lock, LogOut, CheckCircle2, RotateCw } from "lucide-react";
 import Link from "next/link";
 import { AuthStatusBanner } from "@/components/auth-status-banner";
+import { HolographicBadge } from "@/components/holographic-badge";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -160,41 +161,26 @@ export default async function PerfilPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {profile.badges.unlocked.map((b) => (
-            <GameCard key={b.code} color="emerald" className="p-4 flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white border-2 border-emerald-300 flex items-center justify-center text-3xl shadow-sm shrink-0">
-                {b.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-black text-slate-900 text-sm truncate">{b.title}</h3>
-                  <span className="text-2xs font-black text-emerald-800 bg-emerald-200 px-2 py-0.5 rounded-full font-mono">
-                    +{b.xpBonus} XP
-                  </span>
-                </div>
-                <p className="text-xs font-semibold text-emerald-900/80 mt-0.5 leading-tight">
-                  {b.description}
-                </p>
-              </div>
-            </GameCard>
+            <HolographicBadge
+              key={b.code}
+              icon={b.icon}
+              title={b.title}
+              description={b.description}
+              xpBonus={b.xpBonus}
+              unlocked={true}
+            />
           ))}
 
           {profile.badges.locked.map((b) => (
-            <GameCard key={b.code} color="white" className="p-4 flex items-center gap-4 opacity-60">
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 border-2 border-slate-200 flex items-center justify-center text-2xl text-slate-400 shrink-0">
-                <Lock className="w-6 h-6" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-black text-slate-500 text-sm truncate">{b.title}</h3>
-                  <span className="text-2xs font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full font-mono">
-                    +{b.xpBonus} XP
-                  </span>
-                </div>
-                <p className="text-xs font-semibold text-slate-400 mt-0.5 leading-tight">
-                  {b.isSecret ? "Conquista secreta! Pedale para descobrir." : b.description}
-                </p>
-              </div>
-            </GameCard>
+            <HolographicBadge
+              key={b.code}
+              icon={b.icon}
+              title={b.title}
+              description={b.description}
+              xpBonus={b.xpBonus}
+              unlocked={false}
+              isSecret={b.isSecret}
+            />
           ))}
         </div>
       </div>

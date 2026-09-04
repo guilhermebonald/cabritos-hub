@@ -16,13 +16,22 @@ export function BillyMascot({ mood = "cheering", size = "md", className = "" }: 
     xl: "w-44 h-44",
   };
 
+  const moodAnimation = {
+    cheering: "motion-safe:animate-[bounce_2.5s_infinite_ease-in-out]",
+    sprinting: "motion-safe:animate-[pulse_1.8s_infinite_ease-in-out]",
+    trophy: "motion-safe:animate-[wiggle_3s_infinite_ease-in-out]",
+    climbing: "motion-safe:animate-[bounce_3s_infinite_ease-in-out]",
+    vampire: "motion-safe:animate-[pulse_2.2s_infinite_ease-in-out]",
+    resting: "",
+  }[mood];
+
   return (
     <div className={`relative inline-flex items-center justify-center select-none ${sizeMap[size]} ${className}`}>
       <svg
         viewBox="0 0 120 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full drop-shadow-md transition-transform hover:scale-105"
+        className={`w-full h-full drop-shadow-md transition-transform duration-300 hover:scale-105 ${moodAnimation}`}
       >
         {/* Sombra base */}
         <ellipse cx="60" cy="112" rx="42" ry="7" fill="#E2E8F0" />
