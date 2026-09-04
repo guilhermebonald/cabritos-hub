@@ -4,6 +4,8 @@ import { GameCard, GameButton } from "@/components/game-ui";
 import { BillyMascot } from "@/components/billy-mascot";
 import { Trophy, Award, Zap, Mountain, Clock, Lock, LogOut, CheckCircle2, RotateCw } from "lucide-react";
 import Link from "next/link";
+import { AuthStatusBanner } from "@/components/auth-status-banner";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +29,10 @@ export default async function PerfilPage() {
 
   if (!profile) {
     return (
-      <div className="max-w-xl mx-auto py-12">
+      <div className="max-w-xl mx-auto py-12 space-y-6">
+        <Suspense fallback={null}>
+          <AuthStatusBanner />
+        </Suspense>
         <GameCard color="amber" className="text-center space-y-6">
           <BillyMascot mood="cheering" size="lg" className="mx-auto" />
           <div className="space-y-2">
@@ -48,6 +53,10 @@ export default async function PerfilPage() {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
+      <Suspense fallback={null}>
+        <AuthStatusBanner />
+      </Suspense>
+
       {/* Hero Card de Personagem RPG */}
       <GameCard color="amber" className="relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">

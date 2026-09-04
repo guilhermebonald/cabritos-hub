@@ -9,6 +9,8 @@ import { Zap, Mountain, Flame, ArrowRight, Sparkles, Trophy, ChevronRight } from
 import Link from "next/link";
 import { BillyMascot } from "@/components/billy-mascot";
 import { GameCard, GameButton } from "@/components/game-ui";
+import { AuthStatusBanner } from "@/components/auth-status-banner";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +56,11 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      {/* Feedback de Autenticação / Erro de Login Strava */}
+      <Suspense fallback={null}>
+        <AuthStatusBanner />
+      </Suspense>
+
       {/* Hero / Nível & Progresso do Usuário (estilo Duolingo) */}
       {profile ? (
         <GameCard color="amber" className="relative overflow-hidden">
