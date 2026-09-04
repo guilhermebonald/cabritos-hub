@@ -4,8 +4,8 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default function MapaPage() {
-  const mapData = getRealClubRoutes();
+export default async function MapaPage() {
+  const mapData = await getRealClubRoutes();
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">

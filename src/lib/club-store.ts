@@ -1,76 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
-import realData from "./real-strava-data.json";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { processSeasonBackfill, StravaRawActivity } from "./backfill";
 import { computeAthleteProfile, AthleteProfileResult, AthleteActivityRecord } from "./athlete-profile";
 import { aggregateWeeklyRankings, ActivityRecord, getActiveCompetitionWeek } from "./rankings";
 import { aggregateClubRoutes, CollectiveRoutesResult } from "./routes-map";
 import { compileGiroDaSemana, GiroActivityInput } from "./giro";
 
-export interface StoredAthlete {
-  id: string;
-  firstname: string;
-  lastname: string;
-  profileMedium?: string;
-  profile?: string;
-  city?: string;
-  state?: string;
-  clubName?: string;
-  totalXp: number;
-  unlockedBadgeCodes: string[];
-  updatedAt: string;
-}
-
-export interface StoredClubData {
-  athletes: Record<string, StoredAthlete>;
-  activities: Record<string, StravaRawActivity[]>; // keyed by athleteId
-}
-
-const STORE_FILE_PATH = path.join(process.cwd(), "src", "data", "club-store.json");
-
-function ensureDirectoryExists(filePath: string) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-}
-
-// Inicializa dados com loja vazia (atletas conectam sob demanda via OAuth)
-function getInitialStore(): StoredClubData {
-  return {
-    athletes: {},
-    activities: {},
-  };
-}
-
-export function loadClubStore(): StoredClubData {
-  try {
-    if (fs.existsSync(STORE_FILE_PATH)) {
-      const raw = fs.readFileSync(STORE_FILE_PATH, "utf-8");
-      const parsed = JSON.parse(raw) as StoredClubData;
-      if (parsed && typeof parsed.athletes === "object" && typeof parsed.activities === "object") {
-        return parsed;
-      }
-    }
-  } catch (err) {
-    console.warn("Failed reading club store file, initializing fresh store:", err);
-  }
-
-  const initial = getInitialStore();
-  saveClubStore(initial);
-  return initial;
-}
-
-export function saveClubStore(data: StoredClubData): void {
-  try {
-    ensureDirectoryExists(STORE_FILE_PATH);
-    fs.writeFileSync(STORE_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Failed writing club store:", err);
-  }
-}
-
-export function ingestAthleteActivities(params: {
+export interface IngestAthleteParams {
   athlete: {
     id: number | string;
     firstname: string;
@@ -81,131 +18,269 @@ export function ingestAthleteActivities(params: {
     state?: string;
   };
   rawActivities: StravaRawActivity[];
-}): void {
-  const store = loadClubStore();
-  const athleteId = String(params.athlete.id);
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiresAt?: number;
+}
 
-  const existingActivities = store.activities[athleteId] || [];
-  const existingIds = new Set(existingActivities.map((a) => a.id));
+export async function ingestAthleteActivities(params: IngestAthleteParams): Promise<void> {
+  const stravaId = Number(params.athlete.id);
 
-  // Merge de novas atividades sem duplicatas
-  const mergedActivities = [...existingActivities];
-  for (const act of params.rawActivities) {
-    if (!existingIds.has(act.id)) {
-      mergedActivities.push(act);
-      existingIds.add(act.id);
-    }
+  // 1. Upsert atleta
+  const existingAthleteList = await db
+    .select()
+    .from(schema.athletes)
+    .where(eq(schema.athletes.stravaId, stravaId));
+
+  let athleteDbId: string;
+
+  if (existingAthleteList.length > 0) {
+    athleteDbId = existingAthleteList[0].id;
+    await db
+      .update(schema.athletes)
+      .set({
+        firstname: params.athlete.firstname,
+        lastname: params.athlete.lastname,
+        profilePictureUrl: params.athlete.profile_medium || params.athlete.profile || null,
+        isClubMember: true,
+        stravaAccessToken: params.accessToken || existingAthleteList[0].stravaAccessToken,
+        stravaRefreshToken: params.refreshToken || existingAthleteList[0].stravaRefreshToken,
+        tokenExpiresAt: params.tokenExpiresAt ? new Date(params.tokenExpiresAt * 1000) : existingAthleteList[0].tokenExpiresAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.athletes.id, athleteDbId));
+  } else {
+    const inserted = await db
+      .insert(schema.athletes)
+      .values({
+        stravaId,
+        firstname: params.athlete.firstname,
+        lastname: params.athlete.lastname,
+        profilePictureUrl: params.athlete.profile_medium || params.athlete.profile || null,
+        isClubMember: true,
+        stravaAccessToken: params.accessToken || null,
+        stravaRefreshToken: params.refreshToken || null,
+        tokenExpiresAt: params.tokenExpiresAt ? new Date(params.tokenExpiresAt * 1000) : null,
+      })
+      .returning({ id: schema.athletes.id });
+    athleteDbId = inserted[0].id;
   }
 
-  // Executa backfill da temporada completa para calcular XP e badges
+  // 2. Buscar atividades existentes para evitar duplicatas
+  const existingDbActs = await db
+    .select({ stravaActivityId: schema.activities.stravaActivityId })
+    .from(schema.activities)
+    .where(eq(schema.activities.athleteId, athleteDbId));
+
+  const existingIds = new Set(existingDbActs.map((a) => a.stravaActivityId));
+
+  // 3. Processar gamificação e backfill da temporada 2026
   const backfill = processSeasonBackfill({
     athleteCurrentXp: 0,
     existingActivityIds: new Set(),
     existingBadgeCodes: new Set(),
-    rawActivities: mergedActivities,
+    rawActivities: params.rawActivities,
     seasonCutoffDate: "2026-01-01T00:00:00Z",
   });
 
-  store.athletes[athleteId] = {
-    id: athleteId,
-    firstname: params.athlete.firstname,
-    lastname: params.athlete.lastname,
-    profileMedium: params.athlete.profile_medium,
-    profile: params.athlete.profile,
-    city: params.athlete.city,
-    state: params.athlete.state,
-    clubName: "CABRITOS RACE TEAM",
-    totalXp: backfill.newTotalXp,
-    unlockedBadgeCodes: backfill.unlockedBadges.map((b) => b.code),
-    updatedAt: new Date().toISOString(),
-  };
+  // 4. Inserir atividades novas no banco
+  for (const act of backfill.activities) {
+    if (!existingIds.has(act.stravaActivityId)) {
+      await db
+        .insert(schema.activities)
+        .values({
+          athleteId: athleteDbId,
+          stravaActivityId: act.stravaActivityId,
+          name: act.name,
+          type: act.type,
+          startDateLocal: new Date(act.startDateLocal),
+          distanceMeters: String(act.distanceMeters),
+          movingTimeSeconds: act.movingTimeSeconds,
+          elevationGainMeters: String(act.elevationGainMeters),
+          averageSpeedKph: String(act.averageSpeedKph),
+          maxSpeedKph: String(act.maxSpeedKph),
+          summaryPolyline: act.summaryPolyline || null,
+          isEligibleForRanking: act.isEligibleForRanking,
+          xpAwarded: act.xpAwarded,
+        })
+        .onConflictDoNothing();
+      existingIds.add(act.stravaActivityId);
+    }
+  }
 
-  store.activities[athleteId] = mergedActivities;
-  saveClubStore(store);
+  // 5. Inserir badges desbloqueados
+  for (const badge of backfill.unlockedBadges) {
+    await db
+      .insert(schema.badges)
+      .values({
+        code: badge.code,
+        title: badge.title,
+        description: badge.description,
+        icon: badge.icon,
+        isSecret: badge.isSecret,
+        xpBonus: badge.xpBonus,
+      })
+      .onConflictDoNothing();
+
+    await db
+      .insert(schema.athleteBadges)
+      .values({
+        athleteId: athleteDbId,
+        badgeCode: badge.code,
+      })
+      .onConflictDoNothing();
+  }
+
+  // 6. Atualizar XP total e Nível do atleta
+  await db
+    .update(schema.athletes)
+    .set({
+      totalXp: backfill.newTotalXp,
+      currentLevel: backfill.levelInfo.level,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.athletes.id, athleteDbId));
 }
 
-export function deleteAthleteFromStore(athleteId?: string | number): boolean {
-  const store = loadClubStore();
-  if (athleteId) {
-    const idStr = String(athleteId);
-    delete store.athletes[idStr];
-    delete store.activities[idStr];
-  } else {
-    store.athletes = {};
-    store.activities = {};
+export async function deleteAthleteFromStore(athleteId?: string | number): Promise<boolean> {
+  if (!athleteId) {
+    return false;
   }
-  saveClubStore(store);
+  const idNum = Number(athleteId);
+  if (!isNaN(idNum)) {
+    await db.delete(schema.athletes).where(eq(schema.athletes.stravaId, idNum));
+  } else {
+    await db.delete(schema.athletes).where(eq(schema.athletes.id, String(athleteId)));
+  }
   return true;
 }
 
-// Agrega dados coletivos de TODOS os membros sincronizados
-export function getCollectiveClubData() {
-  const store = loadClubStore();
-  const allAthletes = Object.values(store.athletes);
+export async function getAthleteProfileById(athleteId?: string): Promise<AthleteProfileResult | null> {
+  let athleteRow;
 
-  // Lista com todas as atividades de todos os membros
+  if (athleteId) {
+    const idNum = Number(athleteId);
+    if (!isNaN(idNum)) {
+      const byStrava = await db
+        .select()
+        .from(schema.athletes)
+        .where(eq(schema.athletes.stravaId, idNum));
+      athleteRow = byStrava[0];
+    } else {
+      const byUuid = await db
+        .select()
+        .from(schema.athletes)
+        .where(eq(schema.athletes.id, athleteId));
+      athleteRow = byUuid[0];
+    }
+  } else {
+    const first = await db
+      .select()
+      .from(schema.athletes)
+      .orderBy(desc(schema.athletes.totalXp))
+      .limit(1);
+    athleteRow = first[0];
+  }
+
+  if (!athleteRow) {
+    return null;
+  }
+
+  // Carrega atividades do atleta
+  const acts = await db
+    .select()
+    .from(schema.activities)
+    .where(eq(schema.activities.athleteId, athleteRow.id))
+    .orderBy(desc(schema.activities.startDateLocal));
+
+  // Carrega badges do atleta
+  const userBadges = await db
+    .select({ badgeCode: schema.athleteBadges.badgeCode })
+    .from(schema.athleteBadges)
+    .where(eq(schema.athleteBadges.athleteId, athleteRow.id));
+
+  const unlockedBadgeCodes = new Set(userBadges.map((b) => b.badgeCode));
+
+  const athleteActivities: AthleteActivityRecord[] = acts.map((a) => ({
+    id: String(a.stravaActivityId),
+    name: a.name,
+    distanceMeters: Number(a.distanceMeters),
+    elevationGainMeters: Number(a.elevationGainMeters),
+    movingTimeSeconds: a.movingTimeSeconds,
+    startDateLocal: a.startDateLocal.toISOString(),
+    averageSpeedKph: Number(a.averageSpeedKph),
+    activityType: a.type,
+    xpAwarded: a.xpAwarded,
+  }));
+
+  return computeAthleteProfile({
+    athleteId: String(athleteRow.stravaId),
+    firstname: athleteRow.firstname,
+    lastname: athleteRow.lastname,
+    totalXp: athleteRow.totalXp,
+    clubName: "CABRITOS RACE TEAM",
+    avatarUrl: athleteRow.profilePictureUrl || undefined,
+    unlockedBadgeCodes,
+    activities: athleteActivities,
+  });
+}
+
+export async function getCollectiveClubData() {
+  const allAthletes = await db.select().from(schema.athletes);
+  const allActivities = await db.select().from(schema.activities);
+
+  const athleteMap = new Map(allAthletes.map((a) => [a.id, a]));
+
   const allRankingActivities: ActivityRecord[] = [];
   const allRouteInputs: any[] = [];
   const allGiroActivities: GiroActivityInput[] = [];
 
-  for (const ath of allAthletes) {
-    const raw = store.activities[ath.id] || [];
-    const backfill = processSeasonBackfill({
-      athleteCurrentXp: 0,
-      existingActivityIds: new Set(),
-      existingBadgeCodes: new Set(),
-      rawActivities: raw,
-      seasonCutoffDate: "2026-01-01T00:00:00Z",
+  for (const act of allActivities) {
+    const ath = athleteMap.get(act.athleteId);
+    const athleteName = ath ? `${ath.firstname} ${ath.lastname}` : "Atleta Cabritos";
+    const athleteStravaId = ath ? String(ath.stravaId) : act.athleteId;
+
+    allRankingActivities.push({
+      athleteId: athleteStravaId,
+      athleteName,
+      distanceMeters: Number(act.distanceMeters),
+      elevationGainMeters: Number(act.elevationGainMeters),
+      movingTimeSeconds: act.movingTimeSeconds,
+      startDateLocal: act.startDateLocal.toISOString(),
+      isEligibleForRanking: act.isEligibleForRanking,
+      activityType: act.type,
     });
 
-    for (const a of backfill.activities) {
-      allRankingActivities.push({
-        athleteId: ath.id,
-        athleteName: `${ath.firstname} ${ath.lastname}`,
-        distanceMeters: a.distanceMeters,
-        elevationGainMeters: a.elevationGainMeters,
-        movingTimeSeconds: a.movingTimeSeconds,
-        startDateLocal: a.startDateLocal,
-        isEligibleForRanking: a.isEligibleForRanking,
-        activityType: a.type,
-      });
+    allGiroActivities.push({
+      id: String(act.stravaActivityId),
+      athleteId: athleteStravaId,
+      athleteName,
+      distanceMeters: Number(act.distanceMeters),
+      elevationGainMeters: Number(act.elevationGainMeters),
+      movingTimeSeconds: act.movingTimeSeconds,
+      startDateLocal: act.startDateLocal.toISOString(),
+      averageSpeedKph: Number(act.averageSpeedKph),
+      activityType: act.type,
+      isEligibleForRanking: act.isEligibleForRanking,
+    });
 
-      allGiroActivities.push({
-        id: String(a.stravaActivityId),
-        athleteId: ath.id,
-        athleteName: `${ath.firstname} ${ath.lastname}`,
-        distanceMeters: a.distanceMeters,
-        elevationGainMeters: a.elevationGainMeters,
-        movingTimeSeconds: a.movingTimeSeconds,
-        startDateLocal: a.startDateLocal,
-        averageSpeedKph: a.averageSpeedKph,
-        activityType: a.type,
-        isEligibleForRanking: a.isEligibleForRanking,
+    if (act.summaryPolyline) {
+      allRouteInputs.push({
+        id: String(act.stravaActivityId),
+        athleteName,
+        name: act.name,
+        distanceMeters: Number(act.distanceMeters),
+        elevationGainMeters: Number(act.elevationGainMeters),
+        summaryPolyline: act.summaryPolyline,
+        activityType: act.type === "Virtual" ? "Virtual" : "Outdoor",
       });
-    }
-
-    for (const r of raw) {
-      if (r.summary_polyline) {
-        allRouteInputs.push({
-          id: String(r.id),
-          athleteName: `${ath.firstname} ${ath.lastname}`,
-          name: r.name,
-          distanceMeters: r.distance,
-          elevationGainMeters: r.total_elevation_gain,
-          summaryPolyline: r.summary_polyline,
-          activityType: r.type === "VirtualRide" ? "Virtual" : "Outdoor",
-        });
-      }
     }
   }
 
-  // Calcula ciclo semanal ativo (segunda a domingo)
   const activeWeek = getActiveCompetitionWeek(allRankingActivities);
-
   const weeklyRankings = aggregateWeeklyRankings(allRankingActivities, activeWeek);
   const clubRoutes: CollectiveRoutesResult = aggregateClubRoutes(allRouteInputs);
 
-  // Atividades do Giro filtradas para a semana ativa
   const weeklyGiroActivities = allGiroActivities.filter((act) => {
     const actDate = new Date(act.startDateLocal);
     return actDate >= activeWeek.start && actDate <= activeWeek.end;
@@ -216,60 +291,23 @@ export function getCollectiveClubData() {
     year: activeWeek.year,
     activities: weeklyGiroActivities.length > 0 ? weeklyGiroActivities : allGiroActivities,
     previousWeekDistance: allAthletes.map((ath) => ({
-      athleteId: ath.id,
-      totalDistanceKm: 150,
+      athleteId: String(ath.stravaId),
+      totalDistanceKm: 100,
     })),
-    editorialNotes: "Pelotão do Cabritos Racing Team reunido com sincronização automática do Strava!",
+    editorialNotes: "Pelotão do Cabritos Racing Team reunido com sincronização em nuvem no Supabase!",
   });
 
   return {
-    athletes: allAthletes,
+    athletes: allAthletes.map((a) => ({
+      id: String(a.stravaId),
+      firstname: a.firstname,
+      lastname: a.lastname,
+      totalXp: a.totalXp,
+      profilePictureUrl: a.profilePictureUrl,
+    })),
     weeklyRankings,
     clubRoutes,
     giroBulletin,
     activeWeek,
   };
-}
-
-// Retorna o perfil calculado para um atleta específico (ou o primeiro membro)
-export function getAthleteProfileById(athleteId?: string): AthleteProfileResult | null {
-  const store = loadClubStore();
-  const targetId = athleteId;
-  const athlete = targetId ? store.athletes[targetId] : Object.values(store.athletes)[0];
-
-  if (!athlete) {
-    return null;
-  }
-
-  const raw = store.activities[athlete.id] || [];
-  const backfill = processSeasonBackfill({
-    athleteCurrentXp: 0,
-    existingActivityIds: new Set(),
-    existingBadgeCodes: new Set(),
-    rawActivities: raw,
-    seasonCutoffDate: "2026-01-01T00:00:00Z",
-  });
-
-  const athleteProfileActivities: AthleteActivityRecord[] = backfill.activities.map((act) => ({
-    id: String(act.stravaActivityId),
-    name: act.name,
-    distanceMeters: act.distanceMeters,
-    elevationGainMeters: act.elevationGainMeters,
-    movingTimeSeconds: act.movingTimeSeconds,
-    startDateLocal: act.startDateLocal,
-    averageSpeedKph: act.averageSpeedKph,
-    activityType: act.type,
-    xpAwarded: act.xpAwarded,
-  }));
-
-  return computeAthleteProfile({
-    athleteId: athlete.id,
-    firstname: athlete.firstname,
-    lastname: athlete.lastname,
-    totalXp: backfill.newTotalXp,
-    clubName: athlete.clubName || "CABRITOS RACE TEAM",
-    avatarUrl: athlete.profileMedium || athlete.profile,
-    unlockedBadgeCodes: new Set(backfill.unlockedBadges.map((b) => b.code)),
-    activities: athleteProfileActivities,
-  });
 }

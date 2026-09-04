@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
               summary_polyline: act.map?.summary_polyline,
             }));
 
-            ingestAthleteActivities({
+            await ingestAthleteActivities({
               athlete: {
                 id: tokenData.athlete.id,
                 firstname: tokenData.athlete.firstname,
@@ -85,6 +85,9 @@ export async function GET(req: NextRequest) {
                 city: tokenData.athlete.city,
               },
               rawActivities,
+              accessToken: tokenData.access_token,
+              refreshToken: tokenData.refresh_token,
+              tokenExpiresAt: tokenData.expires_at,
             });
           }
         }

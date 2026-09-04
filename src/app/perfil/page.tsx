@@ -25,7 +25,7 @@ export default async function PerfilPage() {
     }
   }
 
-  const profile = loggedAthleteId ? getRealProfile(loggedAthleteId) : null;
+  const profile = loggedAthleteId ? await getRealProfile(loggedAthleteId) : null;
 
   if (!profile) {
     return (

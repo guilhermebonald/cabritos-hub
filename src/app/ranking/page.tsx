@@ -5,8 +5,8 @@ import { Zap, Mountain, Flame, Trophy, Award, Crown } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default function RankingPage() {
-  const rankings = getRealWeeklyRankings();
+export default async function RankingPage() {
+  const rankings = await getRealWeeklyRankings();
   const distance = rankings.distancePodium;
   const mountain = rankings.mountainPodium;
   const consistency = rankings.consistencyPodium;

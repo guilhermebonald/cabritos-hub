@@ -15,8 +15,8 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default function GiroPage() {
-  const bulletin = getRealGiroBulletin();
+export default async function GiroPage() {
+  const bulletin = await getRealGiroBulletin();
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">

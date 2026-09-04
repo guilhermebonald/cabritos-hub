@@ -30,10 +30,10 @@ export default async function HomePage() {
     }
   }
 
-  const profile = loggedAthleteId ? getRealProfile(loggedAthleteId) : null;
-  const rankings = getRealWeeklyRankings();
-  const realGiroBulletin = getRealGiroBulletin();
-  const activeCompetitionWeek = getActiveCompetitionWeek();
+  const profile = loggedAthleteId ? await getRealProfile(loggedAthleteId) : null;
+  const rankings = await getRealWeeklyRankings();
+  const realGiroBulletin = await getRealGiroBulletin();
+  const activeCompetitionWeek = await getActiveCompetitionWeek();
 
   const participants =
     rankings.distancePodium.length > 0

@@ -5,8 +5,8 @@ import { Flag, Trophy, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default function CorridaPage() {
-  const { weeklyRankings, activeWeek } = getRealCollectiveData();
+export default async function CorridaPage() {
+  const { weeklyRankings, activeWeek } = await getRealCollectiveData();
   const podium = weeklyRankings.distancePodium;
 
   const maxDistance = podium.length > 0 ? Math.max(...podium.map((p) => p.totalDistanceKm)) : 100;
