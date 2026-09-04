@@ -91,9 +91,9 @@ export default async function HomePage() {
 
             {/* Barra de Progresso XP estilo Duolingo */}
             <div className="w-full sm:w-80 bg-white/90 p-4 rounded-2xl border-2 border-amber-200 shadow-sm">
-              <div className="flex justify-between items-center text-xs font-black mb-1.5">
-                <span className="text-slate-600 uppercase tracking-wider">Energia de XP</span>
-                <span className="text-amber-600 font-mono">{profile.levelInfo.progressPercent}%</span>
+              <div className="flex justify-between items-center text-xs font-bold mb-1.5">
+                <span className="text-slate-600 uppercase tracking-wider text-[10px]">Energia de XP</span>
+                <span className="text-amber-600 font-mono font-extrabold tabular-nums">{profile.levelInfo.progressPercent}%</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-4 p-0.5 border border-slate-200 overflow-hidden">
                 <div
@@ -101,9 +101,12 @@ export default async function HomePage() {
                   style={{ width: `${profile.levelInfo.progressPercent}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[11px] font-bold text-slate-400 mt-1.5 font-mono">
+              <div className="flex justify-between text-[11px] font-semibold text-slate-500 mt-1.5 font-mono tabular-nums">
                 <span>{profile.totalXp.toLocaleString("pt-BR")} XP</span>
                 <span>{profile.levelInfo.nextLevelXp.toLocaleString("pt-BR")} XP</span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-medium text-center mt-2 pt-1.5 border-t border-slate-100">
+                1 km = 10 XP • 100m D+ = 25 XP
               </div>
             </div>
           </div>
@@ -142,11 +145,11 @@ export default async function HomePage() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-xl">🎯</span>
-                <h2 className="text-base font-black text-emerald-950 uppercase tracking-wide">
+                <h2 className="text-xs font-black text-emerald-950 uppercase tracking-wider">
                   Desafio da Semana
                 </h2>
               </div>
-              <span className="text-xs font-black bg-emerald-200 text-emerald-900 px-3 py-1 rounded-full border border-emerald-300">
+              <span className="text-2xs font-extrabold bg-emerald-200 text-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-300 tabular-nums">
                 +300 XP
               </span>
             </div>
@@ -154,14 +157,16 @@ export default async function HomePage() {
             <h3 className="text-xl font-black text-slate-900 mb-1">
               Desafio Escalador das Cabras
             </h3>
-            <p className="text-xs font-semibold text-emerald-800 mb-4 leading-relaxed">
+            <p className="text-xs font-medium text-emerald-950/80 mb-4 leading-relaxed">
               Acumule pelo menos 1.000 metros de altimetria nos seus pedais até domingo às 23:59.
             </p>
 
             <div className="space-y-1.5 mb-2">
-              <div className="flex justify-between text-xs font-black text-emerald-900">
+              <div className="flex justify-between text-xs font-bold text-emerald-950">
                 <span>Progresso Coletivo</span>
-                <span>{Math.round(rankings.mountainPodium.reduce((acc, p) => acc + p.totalElevationMeters, 0))}m / 5.000m</span>
+                <span className="font-mono tabular-nums font-extrabold text-emerald-900">
+                  {Math.round(rankings.mountainPodium.reduce((acc, p) => acc + p.totalElevationMeters, 0))}m / 5.000m
+                </span>
               </div>
               <div className="w-full bg-emerald-100 rounded-full h-3.5 p-0.5 border border-emerald-300 overflow-hidden">
                 <div
@@ -181,12 +186,12 @@ export default async function HomePage() {
           </div>
 
           <div className="pt-4 border-t border-emerald-200/60 flex items-center justify-between">
-            <span className="text-2xs font-extrabold text-emerald-700 uppercase">
+            <span className="text-2xs font-bold text-emerald-900/70 uppercase tracking-wider">
               Ciclo #{activeCompetitionWeek.weekNumber}
             </span>
             <Link
               href="/desafios"
-              className="inline-flex items-center gap-1 text-xs font-black text-emerald-900 hover:text-emerald-700"
+              className="inline-flex items-center gap-1 text-xs font-black text-emerald-950 hover:text-emerald-800"
             >
               Ver Todas as Missões <ChevronRight className="w-4 h-4" />
             </Link>
@@ -196,10 +201,10 @@ export default async function HomePage() {
         {/* Card Mascote Billy / Dica do Dia */}
         <GameCard color="orange" className="flex flex-col items-center justify-center text-center p-6 space-y-3">
           <BillyMascot mood="trophy" size="md" />
-          <h3 className="text-sm font-black text-orange-950 uppercase tracking-wide">
+          <h3 className="text-xs font-black text-orange-950 uppercase tracking-wider">
             Recado do Billy
           </h3>
-          <p className="text-xs font-bold text-orange-800 leading-relaxed">
+          <p className="text-xs font-medium text-orange-950/85 leading-relaxed">
             &ldquo;Pedal leve ou montanha dura: cada km conta pro ranking do pelotão!&rdquo;
           </p>
           <Link href="/ranking">
@@ -214,14 +219,14 @@ export default async function HomePage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🏁</span>
-            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
+            <span className="text-xl">🏁</span>
+            <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
               Corrida da Semana
             </h2>
           </div>
           <Link
             href="/corrida"
-            className="text-xs font-black text-amber-600 hover:text-amber-700 flex items-center gap-1 uppercase tracking-wider"
+            className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 uppercase tracking-wider"
           >
             Pista Completa <ChevronRight className="w-4 h-4" />
           </Link>
@@ -233,20 +238,28 @@ export default async function HomePage() {
               const progress = maxDistance > 0 ? (cyclist.distanceKm / maxDistance) * 100 : 0;
               return (
                 <div key={cyclist.athleteId} className="space-y-1.5">
-                  <div className="flex justify-between items-center text-xs font-black">
+                  <div className="flex justify-between items-center text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-2xs text-slate-700">
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-2xs font-bold ${
+                        idx === 0
+                          ? "bg-amber-100 text-amber-900 border border-amber-300 font-extrabold"
+                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                      }`}>
                         {idx + 1}
                       </span>
-                      <span className="text-slate-900">{cyclist.athleteName}</span>
+                      <span className="font-bold text-slate-800">{cyclist.athleteName}</span>
                     </div>
-                    <span className="font-mono text-amber-600 font-extrabold">
-                      {cyclist.distanceKm} km
+                    <span className="font-mono tabular-nums text-slate-900 font-bold">
+                      {cyclist.distanceKm} <span className="text-slate-400 font-sans text-2xs">km</span>
                     </span>
                   </div>
-                  <div className="relative w-full bg-slate-100 h-6 rounded-full overflow-hidden border-2 border-slate-200">
+                  <div className="relative w-full bg-slate-100 h-5 rounded-full overflow-hidden border border-slate-200">
                     <div
-                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-700 flex items-center justify-end pr-1.5"
+                      className={`h-full rounded-full transition-all duration-700 flex items-center justify-end pr-1 ${
+                        idx === 0
+                          ? "bg-gradient-to-r from-amber-400 to-orange-500 shadow-sm"
+                          : "bg-gradient-to-r from-slate-400 to-slate-500"
+                      }`}
                       style={{ width: `${Math.max(8, progress)}%` }}
                     >
                       <span className="text-xs select-none">🚴</span>
@@ -257,7 +270,7 @@ export default async function HomePage() {
             })
           ) : (
             <div className="text-center py-6 space-y-2">
-              <p className="text-xs font-bold text-slate-400">
+              <p className="text-xs font-medium text-slate-400">
                 Nenhum ciclista na estrada esta semana.
               </p>
               <GameButton href="/api/auth/strava" variant="primary" size="sm">
@@ -272,14 +285,14 @@ export default async function HomePage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🏆</span>
-            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
+            <span className="text-xl">🏆</span>
+            <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
               Pódios da Semana
             </h2>
           </div>
           <Link
             href="/ranking"
-            className="text-xs font-black text-amber-600 hover:text-amber-700 flex items-center gap-1 uppercase tracking-wider"
+            className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 uppercase tracking-wider"
           >
             Ver Todos os Rankings <ChevronRight className="w-4 h-4" />
           </Link>
@@ -287,59 +300,83 @@ export default async function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <GameCard color="amber" className="p-5">
-            <div className="flex items-center gap-2 mb-3 text-amber-700 font-black text-xs uppercase">
-              <Zap className="w-4 h-4" />
-              Rei da Distância
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                <Zap className="w-4 h-4 text-amber-600 fill-amber-400" />
+                Rei da Distância
+              </div>
+              <span className="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-md">
+                Geral
+              </span>
             </div>
             {rankings.distancePodium[0] ? (
               <div>
-                <div className="text-base font-black text-slate-900">
+                <div className="text-base font-bold text-slate-900">
                   {rankings.distancePodium[0].athleteName}
                 </div>
-                <div className="text-xs font-black text-amber-600 mt-0.5 font-mono">
-                  {rankings.distancePodium[0].totalDistanceKm} km
+                <div className="text-xs font-semibold text-amber-900/80 mt-1 flex items-center justify-between">
+                  <span>Km Acumulado</span>
+                  <span className="font-mono tabular-nums font-extrabold text-amber-700 text-sm">
+                    {rankings.distancePodium[0].totalDistanceKm} km
+                  </span>
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-slate-400 font-bold">Aguardando pedais...</div>
+              <div className="text-xs text-slate-400 font-medium">Aguardando pedais...</div>
             )}
           </GameCard>
 
           <GameCard color="emerald" className="p-5">
-            <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-xs uppercase">
-              <Mountain className="w-4 h-4" />
-              Rei da Montanha
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-emerald-950 font-bold text-xs uppercase tracking-wider">
+                <Mountain className="w-4 h-4 text-emerald-600 fill-emerald-100" />
+                Rei da Montanha
+              </div>
+              <span className="text-[10px] font-mono font-bold bg-emerald-200/80 text-emerald-950 px-2 py-0.5 rounded-md">
+                D+
+              </span>
             </div>
             {rankings.mountainPodium[0] ? (
               <div>
-                <div className="text-base font-black text-slate-900">
+                <div className="text-base font-bold text-slate-900">
                   {rankings.mountainPodium[0].athleteName}
                 </div>
-                <div className="text-xs font-black text-emerald-600 mt-0.5 font-mono">
-                  {rankings.mountainPodium[0].totalElevationMeters} m
+                <div className="text-xs font-semibold text-emerald-900/80 mt-1 flex items-center justify-between">
+                  <span>Desnível</span>
+                  <span className="font-mono tabular-nums font-extrabold text-emerald-800 text-sm">
+                    {rankings.mountainPodium[0].totalElevationMeters} m
+                  </span>
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-slate-400 font-bold">Aguardando pedais...</div>
+              <div className="text-xs text-slate-400 font-medium">Aguardando pedais...</div>
             )}
           </GameCard>
 
           <GameCard color="orange" className="p-5">
-            <div className="flex items-center gap-2 mb-3 text-orange-700 font-black text-xs uppercase">
-              <Flame className="w-4 h-4" />
-              Mais Consistente
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-orange-950 font-bold text-xs uppercase tracking-wider">
+                <Flame className="w-4 h-4 text-orange-600 fill-orange-200" />
+                Mais Consistente
+              </div>
+              <span className="text-[10px] font-mono font-bold bg-orange-200/80 text-orange-950 px-2 py-0.5 rounded-md">
+                Dias
+              </span>
             </div>
             {rankings.consistencyPodium[0] ? (
               <div>
-                <div className="text-base font-black text-slate-900">
+                <div className="text-base font-bold text-slate-900">
                   {rankings.consistencyPodium[0].athleteName}
                 </div>
-                <div className="text-xs font-black text-orange-600 mt-0.5 font-mono">
-                  {rankings.consistencyPodium[0].distinctDays} dias
+                <div className="text-xs font-semibold text-orange-900/80 mt-1 flex items-center justify-between">
+                  <span>Frequência</span>
+                  <span className="font-mono tabular-nums font-extrabold text-orange-800 text-sm">
+                    {rankings.consistencyPodium[0].distinctDays} dias
+                  </span>
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-slate-400 font-bold">Aguardando pedais...</div>
+              <div className="text-xs text-slate-400 font-medium">Aguardando pedais...</div>
             )}
           </GameCard>
         </div>
