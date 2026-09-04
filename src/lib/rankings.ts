@@ -31,7 +31,9 @@ export function aggregateWeeklyRankings(activities: ActivityRecord[]): {
     if (!act.isEligibleForRanking) continue;
 
     const km = act.distanceMeters / 1000;
-    const day = act.startDateLocal.split("T")[0];
+    const rawDate = act.startDateLocal;
+    const dateStr = typeof rawDate === "string" ? rawDate : (rawDate as unknown as Date).toISOString();
+    const day = dateStr.split("T")[0];
     const speedKph = act.movingTimeSeconds > 0 ? (km / (act.movingTimeSeconds / 3600)) : 0;
 
     let stats = athleteMap.get(act.athleteId);

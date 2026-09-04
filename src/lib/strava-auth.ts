@@ -17,7 +17,7 @@ export interface ActivityClassificationInput {
 }
 
 export function classifyActivity(activity: ActivityClassificationInput): "Outdoor" | "Virtual" | "EBike" {
-  if (activity.type === "EBikeRide") {
+  if (activity.type === "EBikeRide" || activity.type === "EMountainBikeRide") {
     return "EBike";
   }
   if (activity.type === "VirtualRide" || activity.trainer === true) {

@@ -23,10 +23,10 @@ export default function RootLayout({
               </span>
             </div>
             <nav className="flex items-center gap-6 text-sm font-medium text-slate-300">
-              <a href="#corrida" className="hover:text-amber-400 transition">Corrida</a>
-              <a href="#rankings" className="hover:text-amber-400 transition">Rankings</a>
-              <a href="#desafios" className="hover:text-amber-400 transition">Desafios</a>
-              <a href="#giro" className="hover:text-amber-400 transition">Giro da Semana</a>
+              <a href="/#corrida" className="hover:text-amber-400 transition">Corrida</a>
+              <a href="/#rankings" className="hover:text-amber-400 transition">Rankings</a>
+              <a href="/#desafios" className="hover:text-amber-400 transition">Desafios</a>
+              <a href="/giro" className="hover:text-amber-400 transition">Giro da Semana</a>
             </nav>
           </div>
         </header>

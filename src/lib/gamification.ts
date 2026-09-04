@@ -29,8 +29,8 @@ export function calculateActivityXp(input: XpCalculationInput): XpCalculationRes
     distanceXp = 80 * 10 + 70 * 5 + (km - 150) * 2.5;
   }
 
-  // Elevation: 1 XP per 10m gain (0.1 XP/m)
-  const elevationXp = elevation / 10;
+  // Elevation: 1 XP per 10m gain (0.1 XP/m), clamped to >= 0
+  const elevationXp = Math.max(0, elevation) / 10;
 
   const baseXp = Math.round(distanceXp + elevationXp);
 
