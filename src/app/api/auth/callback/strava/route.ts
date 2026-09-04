@@ -28,23 +28,34 @@ export async function GET(req: NextRequest) {
     });
 
     // Validar se atleta faz parte do clube oficial (se configurado)
-    const clubId = process.env.STRAVA_CLUB_ID ? Number(process.env.STRAVA_CLUB_ID) : null;
-    if (clubId && tokenData.access_token) {
+    const rawClubId = process.env.STRAVA_CLUB_ID;
+    if (rawClubId && tokenData.access_token) {
       try {
         const clubsRes = await fetch("https://www.strava.com/api/v3/athlete/clubs", {
           headers: { Authorization: `Bearer ${tokenData.access_token}` },
         });
         if (clubsRes.ok) {
           const clubs = await clubsRes.json();
-          const isMember = checkClubMembership(clubs, clubId);
+          console.log(
+            `[Strava Auth] Verifying athlete ${tokenData.athlete?.id} against club ${rawClubId}. Found clubs:`,
+            Array.isArray(clubs) ? clubs.map((c: any) => ({ id: c.id, name: c.name })) : clubs
+          );
+
+          const isMember = checkClubMembership(clubs, rawClubId);
           if (!isMember) {
+            console.warn(
+              `[Strava Auth] Athlete ${tokenData.athlete?.id} rejected: not found in club ${rawClubId}`
+            );
             return NextResponse.redirect(
               `${baseUrl}/?auth_error=not_a_club_member`
             );
           }
+        } else {
+          const errBody = await clubsRes.text();
+          console.warn(`[Strava Auth] Could not fetch athlete clubs (status ${clubsRes.status}):`, errBody);
         }
       } catch (err) {
-        console.warn("Could not verify club membership, proceeding with caution:", err);
+        console.warn("[Strava Auth] Error verifying club membership, proceeding with caution:", err);
       }
     }
 

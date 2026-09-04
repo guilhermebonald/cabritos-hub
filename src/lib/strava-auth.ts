@@ -1,14 +1,15 @@
 export interface StravaClubSummary {
-  id: number;
+  id: number | string;
   name: string;
   sport_type?: string;
 }
 
-export function checkClubMembership(userClubs: StravaClubSummary[], requiredClubId: number): boolean {
+export function checkClubMembership(userClubs: StravaClubSummary[], requiredClubId: number | string): boolean {
   if (!userClubs || !Array.isArray(userClubs)) {
     return false;
   }
-  return userClubs.some((club) => club.id === requiredClubId);
+  const targetId = String(requiredClubId).trim();
+  return userClubs.some((club) => String(club.id).trim() === targetId);
 }
 
 export interface ActivityClassificationInput {
