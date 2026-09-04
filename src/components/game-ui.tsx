@@ -25,6 +25,7 @@ export function GameCard({ children, className = "", color = "white" }: GameCard
 interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "success" | "danger";
   size?: "sm" | "md" | "lg";
+  href?: string;
 }
 
 export function GameButton({
@@ -32,6 +33,7 @@ export function GameButton({
   variant = "primary",
   size = "md",
   className = "",
+  href,
   ...props
 }: GameButtonProps) {
   const variants = {
@@ -51,9 +53,19 @@ export function GameButton({
     lg: "px-7 py-3.5 text-base font-black rounded-2xl",
   };
 
+  const combinedClass = `inline-flex items-center justify-center gap-2 cursor-pointer font-black transition-all uppercase tracking-wide select-none ${variants[variant]} ${sizes[size]} ${className}`;
+
+  if (href) {
+    return (
+      <a href={href} className={combinedClass}>
+        {children}
+      </a>
+    );
+  }
+
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 cursor-pointer font-black transition-all uppercase tracking-wide select-none ${variants[variant]} ${sizes[size]} ${className}`}
+      className={combinedClass}
       {...props}
     >
       {children}

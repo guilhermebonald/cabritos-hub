@@ -127,11 +127,9 @@ export default async function HomePage() {
                 </p>
               </div>
             </div>
-            <a href="/api/auth/strava">
-              <GameButton variant="primary" size="lg">
-                Começar o Jogo
-              </GameButton>
-            </a>
+            <GameButton href="/api/auth/strava" variant="primary" size="lg">
+              Começar o Jogo
+            </GameButton>
           </div>
         </GameCard>
       )}
@@ -262,11 +260,9 @@ export default async function HomePage() {
               <p className="text-xs font-bold text-slate-400">
                 Nenhum ciclista na estrada esta semana.
               </p>
-              <a href="/api/auth/strava">
-                <GameButton variant="primary" size="sm">
-                  Entrar na Corrida
-                </GameButton>
-              </a>
+              <GameButton href="/api/auth/strava" variant="primary" size="sm">
+                Entrar na Corrida
+              </GameButton>
             </div>
           )}
         </GameCard>

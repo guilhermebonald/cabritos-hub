@@ -38,11 +38,9 @@ export default async function PerfilPage() {
               Conecte sua conta do Strava para carregar seu nível, pontuação de XP e coleção de badges!
             </p>
           </div>
-          <a href="/api/auth/strava">
-            <GameButton variant="primary" size="lg">
-              Conectar com Strava
-            </GameButton>
-          </a>
+          <GameButton href="/api/auth/strava" variant="primary" size="lg">
+            Conectar com Strava
+          </GameButton>
         </GameCard>
       </div>
     );
