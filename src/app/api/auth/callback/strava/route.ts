@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeStravaToken, checkClubMembership } from "@/lib/strava-auth";
+import { exchangeStravaToken, checkClubMembership, isStravaAdmin } from "@/lib/strava-auth";
 import { ingestAthleteActivities } from "@/lib/club-store";
 import { StravaRawActivity } from "@/lib/backfill";
 
@@ -27,9 +27,12 @@ export async function GET(req: NextRequest) {
       code,
     });
 
-    // Validar se atleta faz parte do clube oficial (se configurado)
+    // Validar se atleta faz parte do clube oficial ou é Administrador Whitelisted
     const rawClubId = process.env.STRAVA_CLUB_ID;
-    if (rawClubId && tokenData.access_token) {
+    const athleteId = tokenData.athlete?.id;
+    const isAdmin = isStravaAdmin(athleteId);
+
+    if (rawClubId && tokenData.access_token && !isAdmin) {
       try {
         const clubsRes = await fetch("https://www.strava.com/api/v3/athlete/clubs", {
           headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -57,6 +60,8 @@ export async function GET(req: NextRequest) {
       } catch (err) {
         console.warn("[Strava Auth] Error verifying club membership, proceeding with caution:", err);
       }
+    } else if (isAdmin) {
+      console.log(`[Strava Auth] Athlete ${athleteId} bypassed club check as configured Admin.`);
     }
 
     // Ingestão automática das atividades do atleta conectado

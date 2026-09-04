@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import {
   validateWebhookSubscription,
   parseStravaWebhookEvent,
   StravaWebhookPayload,
 } from "@/lib/strava-webhook";
+import { getValidAthleteToken, ingestAthleteActivities } from "@/lib/club-store";
+import { StravaRawActivity } from "@/lib/backfill";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
@@ -37,22 +42,90 @@ export async function GET(req: NextRequest) {
 }
 
 /**
+ * Process single activity event asynchronously without delaying Strava 2s response timeout.
+ */
+async function handleActivityWebhook(activityId: number, athleteStravaId: number, action: string) {
+  if (action === "delete") {
+    await db.delete(schema.activities).where(eq(schema.activities.stravaActivityId, activityId));
+    return;
+  }
+
+  const token = await getValidAthleteToken(athleteStravaId);
+  if (!token) {
+    console.warn(`[Strava Webhook] No token available for athlete ${athleteStravaId}`);
+    return;
+  }
+
+  const res = await fetch(`https://www.strava.com/api/v3/activities/${activityId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    console.error(`[Strava Webhook] Failed to fetch activity ${activityId}:`, res.status);
+    return;
+  }
+
+  const act = await res.json();
+  const rawActivity: StravaRawActivity = {
+    id: act.id,
+    name: act.name,
+    type: act.type,
+    trainer: act.trainer,
+    start_date_local: act.start_date_local,
+    distance: act.distance,
+    moving_time: act.moving_time,
+    total_elevation_gain: act.total_elevation_gain,
+    average_speed: act.average_speed,
+    max_speed: act.max_speed,
+    summary_polyline: act.map?.summary_polyline,
+  };
+
+  const athleteRows = await db
+    .select()
+    .from(schema.athletes)
+    .where(eq(schema.athletes.stravaId, athleteStravaId));
+
+  if (athleteRows.length === 0) {
+    return;
+  }
+
+  const athlete = athleteRows[0];
+
+  await ingestAthleteActivities({
+    athlete: {
+      id: athlete.stravaId,
+      firstname: athlete.firstname,
+      lastname: athlete.lastname,
+      profile_medium: athlete.profilePictureUrl || undefined,
+    },
+    rawActivities: [rawActivity],
+    accessToken: token,
+  });
+}
+
+/**
  * POST /api/webhooks/strava
  * Ingests and routes real-time activity events.
  */
 export async function POST(req: NextRequest) {
   try {
     const payload: StravaWebhookPayload = await req.json();
-
     const event = parseStravaWebhookEvent(payload);
 
-    // If not an activity event (e.g. athlete deauthorization), acknowledge 200 immediately
-    if (!event.isActivityEvent) {
+    if (!event.isActivityEvent || !event.activityId) {
       return NextResponse.json({ status: "ignored", reason: "non_activity_event" }, { status: 200 });
     }
 
-    // ponytail: queue background worker or job dispatch for activity fetch & XP recalculation
-    // Strava requires HTTP 200 response within 2 seconds.
+    // Process in background after 200 response to meet Strava's 2s limit
+    // ponytail: queue to BullMQ or durable worker when event volume exceeds single-server capacity
+    after(async () => {
+      try {
+        await handleActivityWebhook(event.activityId!, event.athleteStravaId, event.action);
+      } catch (err) {
+        console.error("[Strava Webhook Background Ingest Error]:", err);
+      }
+    });
+
     return NextResponse.json(
       {
         status: "received",

@@ -6,6 +6,68 @@ import { computeAthleteProfile, AthleteProfileResult, AthleteActivityRecord } fr
 import { aggregateWeeklyRankings, ActivityRecord, getActiveCompetitionWeek } from "./rankings";
 import { aggregateClubRoutes, CollectiveRoutesResult } from "./routes-map";
 import { compileGiroDaSemana, GiroActivityInput } from "./giro";
+import { refreshStravaToken } from "./strava-auth";
+
+/**
+ * Ensures an athlete has a valid, non-expired access token.
+ * Refreshes automatically if expired or expiring in less than 5 minutes.
+ */
+export async function getValidAthleteToken(athleteIdOrStravaId: string | number): Promise<string | null> {
+  const isNumeric = !isNaN(Number(athleteIdOrStravaId));
+  const athleteRecords = isNumeric
+    ? await db
+        .select()
+        .from(schema.athletes)
+        .where(eq(schema.athletes.stravaId, Number(athleteIdOrStravaId)))
+    : await db
+        .select()
+        .from(schema.athletes)
+        .where(eq(schema.athletes.id, String(athleteIdOrStravaId)));
+
+  if (athleteRecords.length === 0) return null;
+  const athlete = athleteRecords[0];
+
+  const now = new Date();
+  const bufferTime = 5 * 60 * 1000; // 5 minutos de margem
+  const isExpired = athlete.tokenExpiresAt
+    ? athlete.tokenExpiresAt.getTime() - bufferTime < now.getTime()
+    : true;
+
+  if (!isExpired && athlete.stravaAccessToken) {
+    return athlete.stravaAccessToken;
+  }
+
+  if (!athlete.stravaRefreshToken) {
+    return athlete.stravaAccessToken;
+  }
+
+  try {
+    const clientId = process.env.STRAVA_CLIENT_ID || "177152";
+    const clientSecret = process.env.STRAVA_CLIENT_SECRET || "81a5990cb69dbf68512ed209da9c8344d64a6b32";
+
+    const refreshed = await refreshStravaToken({
+      clientId,
+      clientSecret,
+      refreshToken: athlete.stravaRefreshToken,
+    });
+
+    await db
+      .update(schema.athletes)
+      .set({
+        stravaAccessToken: refreshed.access_token,
+        stravaRefreshToken: refreshed.refresh_token,
+        tokenExpiresAt: new Date(refreshed.expires_at * 1000),
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.athletes.id, athlete.id));
+
+    return refreshed.access_token;
+  } catch (err) {
+    console.error(`Failed to auto-refresh Strava token for athlete ${athlete.id}:`, err);
+    return athlete.stravaAccessToken;
+  }
+}
+
 
 export interface IngestAthleteParams {
   athlete: {

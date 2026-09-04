@@ -88,3 +88,40 @@ export async function exchangeStravaToken(params: {
   return (await res.json()) as StravaTokenResponse;
 }
 
+export async function refreshStravaToken(params: {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+}): Promise<StravaTokenResponse> {
+  const res = await fetch("https://www.strava.com/api/v3/oauth/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: params.clientId,
+      client_secret: params.clientSecret,
+      refresh_token: params.refreshToken,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Strava token refresh failed (${res.status}): ${errText}`);
+  }
+
+  return (await res.json()) as StravaTokenResponse;
+}
+
+export function isStravaAdmin(athleteId: number | string | undefined, adminIdsEnv?: string): boolean {
+  if (!athleteId) return false;
+  const rawList = adminIdsEnv || process.env.ADMIN_STRAVA_IDS || "";
+  const adminIds = rawList
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
+  const targetId = String(athleteId).trim();
+  return adminIds.includes(targetId);
+}
+
+

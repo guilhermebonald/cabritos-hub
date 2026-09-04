@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { AlertTriangle, CheckCircle2, XCircle, ExternalLink, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, XCircle, ExternalLink, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
 export function AuthStatusBanner() {
@@ -42,6 +42,46 @@ export function AuthStatusBanner() {
   }
 
   const isNotMember = authError === "not_a_club_member";
+  const isRateLimit = authError === "rate_limit_exceeded" || authError === "quota_exceeded";
+
+  if (isRateLimit) {
+    return (
+      <div className="bg-amber-50 border-2 border-amber-300 border-b-4 border-b-amber-400 text-amber-950 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-in fade-in duration-300">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5 sm:mt-0">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div>
+            <h4 className="text-sm font-black uppercase tracking-wide text-amber-950">
+              Limite de Atletas em Desenvolvimento Strava
+            </h4>
+            <p className="text-xs font-semibold text-amber-900/85 mt-0.5 max-w-xl">
+              O Strava API em modo de desenvolvimento permite sincronização de até 10 atletas simultâneos. Fale com a organização do Cabritos no WhatsApp para habilitar seu perfil.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 self-end sm:self-center">
+          <a
+            href="https://wa.me/?text=Ol%C3%A1%2C%20gostaria%20de%20liberar%20meu%20acesso%20no%20Cabritos%20Hub%21"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-3.5 py-2 rounded-xl uppercase tracking-wider transition-all shadow-sm"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>Falar no WhatsApp</span>
+          </a>
+          <button
+            onClick={() => setDismissed(true)}
+            className="text-amber-800 hover:text-amber-950 p-1.5 rounded-lg hover:bg-amber-100 transition-colors"
+            aria-label="Fechar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-rose-50 border-2 border-rose-300 border-b-4 border-b-rose-400 text-rose-950 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-in fade-in duration-300">
