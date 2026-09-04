@@ -43,3 +43,22 @@ describe("Activity Classification", () => {
     assert.equal(classifyActivity({ type: "EBikeRide" }), "EBike");
   });
 });
+
+describe("Strava OAuth Helpers", () => {
+  it("should build proper Strava authorize URL", () => {
+    const { buildStravaAuthorizeUrl } = require("./strava-auth");
+    const url = buildStravaAuthorizeUrl({
+      clientId: "177152",
+      redirectUri: "http://localhost:3000/api/auth/callback/strava",
+      scope: "read,activity:read_all",
+      state: "xyz123",
+    });
+
+    assert.match(url, /^https:\/\/www\.strava\.com\/oauth\/authorize\?/);
+    assert.match(url, /client_id=177152/);
+    assert.match(url, /redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fstrava/);
+    assert.match(url, /response_type=code/);
+    assert.match(url, /state=xyz123/);
+  });
+});
+

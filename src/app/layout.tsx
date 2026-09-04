@@ -25,10 +25,15 @@ export default function RootLayout({
             <nav className="flex items-center gap-6 text-sm font-medium text-slate-300">
               <a href="/#corrida" className="hover:text-amber-400 transition">Corrida</a>
               <a href="/#rankings" className="hover:text-amber-400 transition">Rankings</a>
-              <a href="/#desafios" className="hover:text-amber-400 transition">Desafios</a>
               <a href="/mapa" className="hover:text-amber-400 transition">Mapa Coletivo</a>
               <a href="/giro" className="hover:text-amber-400 transition">Giro da Semana</a>
               <a href="/perfil" className="hover:text-amber-400 transition text-amber-400/90 font-semibold">Meu Perfil</a>
+              <a
+                href="/api/auth/strava"
+                className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+              >
+                <span>Conectar Strava</span>
+              </a>
             </nav>
           </div>
         </header>

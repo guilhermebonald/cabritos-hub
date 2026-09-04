@@ -28,13 +28,13 @@ export default function PerfilPage() {
           Voltar ao Hub
         </Link>
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <a
+            href="/api/auth/strava"
             className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
           >
             <RotateCw className="w-3.5 h-3.5 text-amber-400" />
             Sincronizar Strava
-          </button>
+          </a>
           <a
             href={`/api/og?type=level_up&athlete=${encodeURIComponent(
               profile.fullName
