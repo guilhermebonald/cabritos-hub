@@ -35,51 +35,11 @@ function ensureDirectoryExists(filePath: string) {
   }
 }
 
-// Inicializa dados com o membro fundador Guilherme Bonald
+// Inicializa dados com loja vazia (atletas conectam sob demanda via OAuth)
 function getInitialStore(): StoredClubData {
-  const guilhermeRawActivities: StravaRawActivity[] = (realData.activities as any[]).map((act) => ({
-    id: act.id,
-    name: act.name,
-    type: act.type,
-    trainer: act.trainer,
-    start_date_local: act.start_date_local,
-    distance: act.distance,
-    moving_time: act.moving_time,
-    total_elevation_gain: act.total_elevation_gain,
-    average_speed: act.average_speed,
-    max_speed: act.max_speed,
-    summary_polyline: act.map?.summary_polyline,
-  }));
-
-  const backfill = processSeasonBackfill({
-    athleteCurrentXp: 0,
-    existingActivityIds: new Set(),
-    existingBadgeCodes: new Set(),
-    rawActivities: guilhermeRawActivities,
-    seasonCutoffDate: "2026-01-01T00:00:00Z",
-  });
-
-  const guilhermeId = String(realData.athlete.id);
-
   return {
-    athletes: {
-      [guilhermeId]: {
-        id: guilhermeId,
-        firstname: realData.athlete.firstname,
-        lastname: realData.athlete.lastname,
-        profileMedium: realData.athlete.profile_medium,
-        profile: realData.athlete.profile,
-        city: realData.athlete.city,
-        state: realData.athlete.state,
-        clubName: "CABRITOS RACE TEAM",
-        totalXp: backfill.newTotalXp,
-        unlockedBadgeCodes: backfill.unlockedBadges.map((b) => b.code),
-        updatedAt: new Date().toISOString(),
-      },
-    },
-    activities: {
-      [guilhermeId]: guilhermeRawActivities,
-    },
+    athletes: {},
+    activities: {},
   };
 }
 

@@ -4,13 +4,29 @@ import {
   getRealGiroBulletin,
   getActiveCompetitionWeek,
 } from "@/lib/real-data-provider";
+import { cookies } from "next/headers";
 import { Trophy, Flame, Mountain, Zap, Award, Users, RotateCw, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const profile = getRealProfile();
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("cabritos_athlete")?.value;
+  let loggedAthleteId: string | undefined;
+
+  if (sessionCookie) {
+    try {
+      const parsed = JSON.parse(sessionCookie);
+      if (parsed && parsed.id) {
+        loggedAthleteId = String(parsed.id);
+      }
+    } catch {
+      // Ignora erro de parse
+    }
+  }
+
+  const profile = loggedAthleteId ? getRealProfile(loggedAthleteId) : null;
   const rankings = getRealWeeklyRankings();
   const realGiroBulletin = getRealGiroBulletin();
   const activeCompetitionWeek = getActiveCompetitionWeek();

@@ -1,4 +1,5 @@
 import { getRealProfile } from "@/lib/real-data-provider";
+import { cookies } from "next/headers";
 import {
   Trophy,
   Award,
@@ -18,8 +19,24 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default function PerfilPage() {
-  const profile = getRealProfile();
+export default async function PerfilPage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("cabritos_athlete")?.value;
+  let loggedAthleteId: string | undefined;
+
+  if (sessionCookie) {
+    try {
+      const parsed = JSON.parse(sessionCookie);
+      if (parsed && parsed.id) {
+        loggedAthleteId = String(parsed.id);
+      }
+    } catch {
+      // Ignora erro de parse
+    }
+  }
+
+  // Se não houver sessão ativa por cookie, o usuário não está logado
+  const profile = loggedAthleteId ? getRealProfile(loggedAthleteId) : null;
 
   if (!profile) {
     return (

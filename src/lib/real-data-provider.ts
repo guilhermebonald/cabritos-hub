@@ -69,8 +69,8 @@ const athleteProfileActivities: AthleteActivityRecord[] = backfillResult.activit
 
 import { getCollectiveClubData, getAthleteProfileById } from "./club-store";
 
-export function getRealProfile() {
-  return getAthleteProfileById();
+export function getRealProfile(athleteId?: string) {
+  return getAthleteProfileById(athleteId);
 }
 
 export function getRealCollectiveData() {
