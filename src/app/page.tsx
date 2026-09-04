@@ -204,6 +204,150 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Desafios da Semana */}
+      <section id="desafios" className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              🎯 Desafios da Semana
+            </h2>
+            <p className="text-sm text-slate-400">
+              Complete missões para acelerar seu ganho de XP e fortalecer o clube.
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+            4 Ativos
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                  Fácil • Individual
+                </span>
+                <span className="text-xs font-mono font-bold text-amber-400">+250 XP</span>
+              </div>
+              <h3 className="font-bold text-slate-100 text-base">Giro de Aquecimento</h3>
+              <p className="text-xs text-slate-400 mt-1">Pedale pelo menos 60 km durante a semana.</p>
+            </div>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-slate-400">45 / 60 km</span>
+                <span className="text-emerald-400">75%</span>
+              </div>
+              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
+                <div className="bg-emerald-500 h-full rounded-full" style={{ width: "75%" }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                  Médio • Individual
+                </span>
+                <span className="text-xs font-mono font-bold text-amber-400">+500 XP</span>
+              </div>
+              <h3 className="font-bold text-slate-100 text-base">Consistência de Ferro</h3>
+              <p className="text-xs text-slate-400 mt-1">Pedale em pelo menos 4 dias diferentes.</p>
+            </div>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-slate-400">3 / 4 dias</span>
+                <span className="text-amber-400">75%</span>
+              </div>
+              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
+                <div className="bg-amber-500 h-full rounded-full" style={{ width: "75%" }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">
+                  Difícil • Individual
+                </span>
+                <span className="text-xs font-mono font-bold text-amber-400">+800 XP</span>
+              </div>
+              <h3 className="font-bold text-slate-100 text-base">Desafio das Alturas</h3>
+              <p className="text-xs text-slate-400 mt-1">Acumule 2.500m de altimetria na semana.</p>
+            </div>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-slate-400">1.820 / 2.500 m</span>
+                <span className="text-rose-400">72%</span>
+              </div>
+              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
+                <div className="bg-rose-500 h-full rounded-full" style={{ width: "72%" }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/70 border border-blue-500/30 rounded-2xl p-5 flex flex-col justify-between shadow-lg shadow-blue-500/5">
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                  Cooperativo • Clube
+                </span>
+                <span className="text-xs font-mono font-bold text-amber-400">+300 XP Geral</span>
+              </div>
+              <h3 className="font-bold text-slate-100 text-base">Missão Cabritos 2.000k</h3>
+              <p className="text-xs text-slate-400 mt-1">O clube todo deve somar 2.000 km juntos.</p>
+            </div>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="text-slate-400">1.480 / 2.000 km</span>
+                <span className="text-blue-400">74%</span>
+              </div>
+              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full" style={{ width: "74%" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Conquistas / Badges */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          🎖️ Conquistas Desbloqueadas
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-slate-900/60 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
+            <span className="text-3xl">🏅</span>
+            <div>
+              <div className="font-bold text-sm text-slate-100">Centurião</div>
+              <div className="text-[11px] text-slate-400">Pedal de 100 km concluído</div>
+            </div>
+          </div>
+          <div className="bg-slate-900/60 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
+            <span className="text-3xl">⛰️</span>
+            <div>
+              <div className="font-bold text-sm text-slate-100">Montanhês</div>
+              <div className="text-[11px] text-slate-400">10.000m na temporada</div>
+            </div>
+          </div>
+          <div className="bg-slate-900/60 border border-purple-500/30 rounded-xl p-4 flex items-center gap-3">
+            <span className="text-3xl">🧛</span>
+            <div>
+              <div className="font-bold text-sm text-purple-300">Vampiro (Secreta)</div>
+              <div className="text-[11px] text-slate-400">Desbravador da noite</div>
+            </div>
+          </div>
+          <div className="bg-slate-950/40 border border-dashed border-slate-800 rounded-xl p-4 flex items-center gap-3 opacity-60">
+            <span className="text-3xl filter grayscale">🚀</span>
+            <div>
+              <div className="font-bold text-sm text-slate-300">Foguete</div>
+              <div className="text-[11px] text-slate-500">Bloqueada (+35 km/h)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Prêmios da Semana & Zoeira */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-900/80 to-slate-950 border border-slate-800 rounded-2xl p-6 sm:p-8">
         <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
