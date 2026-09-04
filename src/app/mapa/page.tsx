@@ -1,58 +1,9 @@
-import { aggregateClubRoutes, ActivityRouteInput } from "@/lib/routes-map";
+import { realClubRoutes } from "@/lib/real-data-provider";
 import { MapPin, Mountain, Zap, Users, Compass, ChevronLeft, Share2, Layers } from "lucide-react";
 import Link from "next/link";
 
 export default function MapaPage() {
-  // Mock club activities with realistic Strava polylines in Serra da Cantareira / Campos do Jordão
-  const mockActivities: ActivityRouteInput[] = [
-    {
-      id: "act-1",
-      athleteName: "Guilherme Bonald",
-      name: "Subida da Serra do Mar",
-      distanceMeters: 62000,
-      elevationGainMeters: 1650,
-      summaryPolyline: "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
-      activityType: "Outdoor",
-    },
-    {
-      id: "act-2",
-      athleteName: "João Silva",
-      name: "Giro Longo das Represas",
-      distanceMeters: 110000,
-      elevationGainMeters: 1420,
-      summaryPolyline: "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
-      activityType: "Outdoor",
-    },
-    {
-      id: "act-3",
-      athleteName: "Carlos Alpinista",
-      name: "Desafio dos 2.000m",
-      distanceMeters: 45000,
-      elevationGainMeters: 2150,
-      summaryPolyline: "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
-      activityType: "Outdoor",
-    },
-    {
-      id: "act-4",
-      athleteName: "Mariana Veloz",
-      name: "Treino Intervalado da Manhã",
-      distanceMeters: 55000,
-      elevationGainMeters: 680,
-      summaryPolyline: "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
-      activityType: "Outdoor",
-    },
-    {
-      id: "act-5-indoor",
-      athleteName: "Pedro Passeio",
-      name: "Giro no Rolo Zwift",
-      distanceMeters: 30000,
-      elevationGainMeters: 150,
-      summaryPolyline: undefined, // Sem GPS
-      activityType: "Virtual",
-    },
-  ];
-
-  const mapData = aggregateClubRoutes(mockActivities);
+  const mapData = realClubRoutes;
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
@@ -182,19 +133,19 @@ export default function MapaPage() {
             <div className="flex items-center gap-6 text-xs text-slate-400">
               <span className="flex items-center gap-2">
                 <span className="w-3 h-1 rounded-full bg-emerald-500" />
-                Subida da Serra
+                Iúna / ES
               </span>
               <span className="flex items-center gap-2">
                 <span className="w-3 h-1 rounded-full bg-amber-500" />
-                Giro das Represas
+                Serra do Caparaó
               </span>
               <span className="flex items-center gap-2">
                 <span className="w-3 h-1 rounded-full bg-sky-400" />
-                Desafio 2.000m
+                Pico da Bandeira & Região
               </span>
             </div>
             <div className="text-xs text-slate-500 font-mono">
-              Projeção WGS84 • Integrado ao MapLibre / Leaflet
+              Projeção WGS84 • Rotas Reais de Guilherme Bonald (Strava)
             </div>
           </div>
         </div>

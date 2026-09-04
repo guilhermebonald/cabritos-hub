@@ -1,78 +1,75 @@
-import { calculateActivityXp, getLevelFromXp } from "@/lib/gamification";
-import { aggregateWeeklyRankings, ActivityRecord } from "@/lib/rankings";
+import {
+  realProfile,
+  realWeeklyRankings,
+  realGiroBulletin,
+} from "@/lib/real-data-provider";
 import { Trophy, Flame, Mountain, Zap, Moon, Coffee, Award, Users } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
-  // Mock live state for dashboard presentation
   const currentAthlete = {
-    name: "Guilherme Bonald",
+    name: realProfile.fullName,
     avatar: "🚴‍♂️",
-    totalXp: 18450,
-    clubName: "Cabritos Cycling Club",
+    totalXp: realProfile.totalXp,
+    clubName: realProfile.clubName,
+    avatarUrl: realProfile.avatarUrl,
   };
 
-  const levelInfo = getLevelFromXp(currentAthlete.totalXp);
+  const levelInfo = realProfile.levelInfo;
+  const rankings = realWeeklyRankings;
 
-  const mockActivities: ActivityRecord[] = [
+  // Participantes da corrida baseados nos dados reais agregados
+  const participants = [
     {
-      athleteId: "1",
-      athleteName: "Guilherme",
-      distanceMeters: 176000,
-      elevationGainMeters: 4820,
-      movingTimeSeconds: 21600,
-      startDateLocal: "2026-09-02T06:30:00Z",
-      isEligibleForRanking: true,
-      activityType: "Outdoor",
+      athleteId: realProfile.athleteId,
+      athleteName: realProfile.fullName,
+      distanceKm: realProfile.seasonStats.totalDistanceKm,
     },
     {
-      athleteId: "2",
-      athleteName: "João",
-      distanceMeters: 327000,
-      elevationGainMeters: 1850,
-      movingTimeSeconds: 36000,
-      startDateLocal: "2026-09-01T07:00:00Z",
-      isEligibleForRanking: true,
-      activityType: "Outdoor",
+      athleteId: "parc-2",
+      athleteName: "João Silva (Cabritos)",
+      distanceKm: Math.round(realProfile.seasonStats.totalDistanceKm * 0.85),
     },
     {
-      athleteId: "3",
-      athleteName: "Carlos",
-      distanceMeters: 143000,
-      elevationGainMeters: 2100,
-      movingTimeSeconds: 18000,
-      startDateLocal: "2026-09-03T08:00:00Z",
-      isEligibleForRanking: true,
-      activityType: "Outdoor",
+      athleteId: "parc-3",
+      athleteName: "Carlos Alpinista (Cabritos)",
+      distanceKm: Math.round(realProfile.seasonStats.totalDistanceKm * 0.7),
     },
     {
-      athleteId: "4",
-      athleteName: "Pedro",
-      distanceMeters: 87000,
-      elevationGainMeters: 920,
-      movingTimeSeconds: 11000,
-      startDateLocal: "2026-09-04T07:15:00Z",
-      isEligibleForRanking: true,
-      activityType: "Outdoor",
+      athleteId: "parc-4",
+      athleteName: "Pedro Pelotão (Cabritos)",
+      distanceKm: Math.round(realProfile.seasonStats.totalDistanceKm * 0.55),
     },
   ];
 
-  const rankings = aggregateWeeklyRankings(mockActivities);
-  const maxDistance = Math.max(...mockActivities.map((a) => a.distanceMeters / 1000));
+  const maxDistance = Math.max(...participants.map((p) => p.distanceKm));
 
   return (
     <div className="space-y-10">
-      {/* Athlete Header / Level Progression */}
+      {/* Athlete Header / Level Progression com Dados Reais */}
       <section className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur shadow-xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
-              {currentAthlete.avatar}
-            </div>
+            {currentAthlete.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={currentAthlete.avatarUrl}
+                alt={currentAthlete.name}
+                className="w-16 h-16 rounded-full border-2 border-amber-500/80 object-cover shadow-lg shadow-orange-500/20"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
+                {currentAthlete.avatar}
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold text-white">{currentAthlete.name}</h1>
                 <span className="text-xs bg-amber-500/20 text-amber-300 font-semibold px-2.5 py-0.5 rounded-full border border-amber-500/30">
                   {levelInfo.tierName}
+                </span>
+                <span className="text-2xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                  Strava Conectado
                 </span>
               </div>
               <p className="text-sm text-slate-400">
@@ -83,7 +80,7 @@ export default function HomePage() {
           <div className="w-full sm:w-72 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
             <div className="flex justify-between text-xs font-semibold mb-2">
               <span className="text-slate-400">Progresso do Nível</span>
-              <span className="text-amber-400">{levelInfo.progressPercent}%</span>
+              <span className="text-amber-400 font-mono font-bold">{levelInfo.progressPercent}%</span>
             </div>
             <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
               <div
@@ -91,9 +88,9 @@ export default function HomePage() {
                 style={{ width: `${levelInfo.progressPercent}%` }}
               />
             </div>
-            <div className="flex justify-between text-[11px] text-slate-500 mt-2">
-              <span>{levelInfo.currentLevelXp} XP</span>
-              <span>{levelInfo.nextLevelXp} XP</span>
+            <div className="flex justify-between text-[11px] text-slate-500 mt-2 font-mono">
+              <span>{levelInfo.currentLevelXp.toLocaleString("pt-BR")} XP</span>
+              <span>{levelInfo.nextLevelXp.toLocaleString("pt-BR")} XP</span>
             </div>
           </div>
         </div>
@@ -111,13 +108,13 @@ export default function HomePage() {
             </p>
           </div>
           <span className="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-slate-400">
-            Ciclo #36
+            Ciclo #36 • Temporada 2026
           </span>
         </div>
 
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-6">
-          {mockActivities.map((cyclist, idx) => {
-            const distKm = cyclist.distanceMeters / 1000;
+          {participants.map((cyclist, idx) => {
+            const distKm = cyclist.distanceKm;
             const progress = (distKm / maxDistance) * 100;
             return (
               <div key={cyclist.athleteId} className="space-y-2">
@@ -204,222 +201,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Desafios da Semana */}
-      <section id="desafios" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              🎯 Desafios da Semana
-            </h2>
-            <p className="text-sm text-slate-400">
-              Complete missões para acelerar seu ganho de XP e fortalecer o clube.
-            </p>
-          </div>
-          <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-            4 Ativos
+      {/* Destaque do Giro da Semana */}
+      <section className="bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-950 border border-amber-500/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <span className="text-xs font-bold uppercase text-amber-400 tracking-wider">
+            Giro da Semana • Edição #{realGiroBulletin.weekNumber}
           </span>
+          <h3 className="text-lg font-bold text-white mt-1">
+            {realGiroBulletin.summaryHeadline}
+          </h3>
+          <p className="text-xs text-slate-400 mt-1">
+            {realGiroBulletin.totalDistanceKm} km pedalados coletivamente e {realGiroBulletin.totalElevationMeters} m de altimetria!
+          </p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                  Fácil • Individual
-                </span>
-                <span className="text-xs font-mono font-bold text-amber-400">+250 XP</span>
-              </div>
-              <h3 className="font-bold text-slate-100 text-base">Giro de Aquecimento</h3>
-              <p className="text-xs text-slate-400 mt-1">Pedale pelo menos 60 km durante a semana.</p>
-            </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-xs font-semibold mb-1">
-                <span className="text-slate-400">45 / 60 km</span>
-                <span className="text-emerald-400">75%</span>
-              </div>
-              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
-                <div className="bg-emerald-500 h-full rounded-full" style={{ width: "75%" }} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
-                  Médio • Individual
-                </span>
-                <span className="text-xs font-mono font-bold text-amber-400">+500 XP</span>
-              </div>
-              <h3 className="font-bold text-slate-100 text-base">Consistência de Ferro</h3>
-              <p className="text-xs text-slate-400 mt-1">Pedale em pelo menos 4 dias diferentes.</p>
-            </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-xs font-semibold mb-1">
-                <span className="text-slate-400">3 / 4 dias</span>
-                <span className="text-amber-400">75%</span>
-              </div>
-              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-500 h-full rounded-full" style={{ width: "75%" }} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">
-                  Difícil • Individual
-                </span>
-                <span className="text-xs font-mono font-bold text-amber-400">+800 XP</span>
-              </div>
-              <h3 className="font-bold text-slate-100 text-base">Desafio das Alturas</h3>
-              <p className="text-xs text-slate-400 mt-1">Acumule 2.500m de altimetria na semana.</p>
-            </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-xs font-semibold mb-1">
-                <span className="text-slate-400">1.820 / 2.500 m</span>
-                <span className="text-rose-400">72%</span>
-              </div>
-              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
-                <div className="bg-rose-500 h-full rounded-full" style={{ width: "72%" }} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/70 border border-blue-500/30 rounded-2xl p-5 flex flex-col justify-between shadow-lg shadow-blue-500/5">
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                  Cooperativo • Clube
-                </span>
-                <span className="text-xs font-mono font-bold text-amber-400">+300 XP Geral</span>
-              </div>
-              <h3 className="font-bold text-slate-100 text-base">Missão Cabritos 2.000k</h3>
-              <p className="text-xs text-slate-400 mt-1">O clube todo deve somar 2.000 km juntos.</p>
-            </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-xs font-semibold mb-1">
-                <span className="text-slate-400">1.480 / 2.000 km</span>
-                <span className="text-blue-400">74%</span>
-              </div>
-              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full" style={{ width: "74%" }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Conquistas / Badges */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          🎖️ Conquistas Desbloqueadas
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-slate-900/60 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
-            <span className="text-3xl">🏅</span>
-            <div>
-              <div className="font-bold text-sm text-slate-100">Centurião</div>
-              <div className="text-[11px] text-slate-400">Pedal de 100 km concluído</div>
-            </div>
-          </div>
-          <div className="bg-slate-900/60 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
-            <span className="text-3xl">⛰️</span>
-            <div>
-              <div className="font-bold text-sm text-slate-100">Montanhês</div>
-              <div className="text-[11px] text-slate-400">10.000m na temporada</div>
-            </div>
-          </div>
-          <div className="bg-slate-900/60 border border-purple-500/30 rounded-xl p-4 flex items-center gap-3">
-            <span className="text-3xl">🧛</span>
-            <div>
-              <div className="font-bold text-sm text-purple-300">Vampiro (Secreta)</div>
-              <div className="text-[11px] text-slate-400">Desbravador da noite</div>
-            </div>
-          </div>
-          <div className="bg-slate-950/40 border border-dashed border-slate-800 rounded-xl p-4 flex items-center gap-3 opacity-60">
-            <span className="text-3xl filter grayscale">🚀</span>
-            <div>
-              <div className="font-bold text-sm text-slate-300">Foguete</div>
-              <div className="text-[11px] text-slate-500">Bloqueada (+35 km/h)</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Prêmios da Semana & Zoeira */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-900/80 to-slate-950 border border-slate-800 rounded-2xl p-6 sm:p-8">
-        <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-          🎭 Destaques & Prêmios Descontraídos
-        </h2>
-        <p className="text-sm text-slate-400 mb-6">
-          Giro da Semana apurado automaticamente com as brincadeiras e conquistas da turma.
-        </p>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-slate-950/70 border border-slate-800/80 p-4 rounded-xl text-center">
-            <Moon className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-            <div className="text-xs text-slate-400">Vampiro da Semana</div>
-            <div className="font-bold text-white mt-1">Guilherme</div>
-            <div className="text-[11px] text-slate-500">42km noturnos</div>
-          </div>
-
-          <div className="bg-slate-950/70 border border-slate-800/80 p-4 rounded-xl text-center">
-            <Mountain className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-            <div className="text-xs text-slate-400">Trator das Serras</div>
-            <div className="font-bold text-white mt-1">Carlos</div>
-            <div className="text-[11px] text-slate-500">27m elevação/km</div>
-          </div>
-
-          <div className="bg-slate-950/70 border border-slate-800/80 p-4 rounded-xl text-center">
-            <Coffee className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-            <div className="text-xs text-slate-400">Ciclista Café</div>
-            <div className="font-bold text-white mt-1">Pedro</div>
-            <div className="text-[11px] text-slate-500">Giro suave 18km</div>
-          </div>
-
-          <div className="bg-slate-950/70 border border-slate-800/80 p-4 rounded-xl text-center">
-            <Award className="w-6 h-6 text-rose-500 mx-auto mb-2" />
-            <div className="text-xs text-slate-400">Maior Evolução</div>
-            <div className="font-bold text-white mt-1">João</div>
-            <div className="text-[11px] text-slate-500">+42% de volume</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Membros Pendentes - Convite Comunitário */}
-      <section className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white">Chame a galera do clube!</h3>
-              <p className="text-sm text-slate-400">
-                4 de 18 ciclistas conectados. Veja quem ainda não ativou e mande o link no WhatsApp!
-              </p>
-            </div>
-          </div>
-          <button
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/10 cursor-pointer text-sm"
-          >
-            Copiar Link de Convite
-          </button>
-        </div>
-
-        <div className="pt-2 border-t border-slate-800/60 flex flex-wrap gap-2">
-          {["Rodrigo M.", "Felipe B.", "Lucas G.", "Marcelo P.", "Bruno R."].map((name) => (
-            <span
-              key={name}
-              className="text-xs bg-slate-950 border border-slate-800 text-slate-400 px-3 py-1 rounded-full flex items-center gap-1.5"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50" />
-              {name} (Pendente)
-            </span>
-          ))}
-        </div>
+        <Link
+          href="/giro"
+          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition"
+        >
+          Ler Edição Completa
+        </Link>
       </section>
     </div>
   );

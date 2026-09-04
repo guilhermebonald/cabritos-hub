@@ -1,4 +1,4 @@
-import { compileGiroDaSemana, GiroActivityInput, AthleteHistoricalDistance } from "@/lib/giro";
+import { realGiroBulletin } from "@/lib/real-data-provider";
 import {
   Trophy,
   Mountain,
@@ -14,84 +14,7 @@ import {
 import Link from "next/link";
 
 export default function GiroPage() {
-  // Mock data for weekly cycle #36
-  const activities: GiroActivityInput[] = [
-    {
-      id: "1",
-      athleteId: "ath-1",
-      athleteName: "João Silva",
-      distanceMeters: 327000,
-      elevationGainMeters: 1850,
-      movingTimeSeconds: 36000,
-      startDateLocal: "2026-09-01T07:00:00Z",
-      averageSpeedKph: 32.7,
-      activityType: "Outdoor",
-      isEligibleForRanking: true,
-    },
-    {
-      id: "2",
-      athleteId: "ath-2",
-      athleteName: "Guilherme Bonald",
-      distanceMeters: 176000,
-      elevationGainMeters: 4820,
-      movingTimeSeconds: 21600,
-      startDateLocal: "2026-09-02T02:15:00Z", // Vampiro night ride
-      averageSpeedKph: 29.3,
-      activityType: "Outdoor",
-      isEligibleForRanking: true,
-    },
-    {
-      id: "3",
-      athleteId: "ath-3",
-      athleteName: "Carlos Alpinista",
-      distanceMeters: 143000,
-      elevationGainMeters: 5720, // 40 m/km (Trator winner)
-      movingTimeSeconds: 19800,
-      startDateLocal: "2026-09-03T08:00:00Z",
-      averageSpeedKph: 26.0,
-      activityType: "Outdoor",
-      isEligibleForRanking: true,
-    },
-    {
-      id: "4",
-      athleteId: "ath-4",
-      athleteName: "Pedro Passeio",
-      distanceMeters: 18000,
-      elevationGainMeters: 110,
-      movingTimeSeconds: 4320,
-      startDateLocal: "2026-09-05T09:30:00Z",
-      averageSpeedKph: 15.0, // Ciclista Café
-      activityType: "Outdoor",
-      isEligibleForRanking: true,
-    },
-    {
-      id: "5",
-      athleteId: "ath-5",
-      athleteName: "Mariana Veloz",
-      distanceMeters: 65000,
-      elevationGainMeters: 450,
-      movingTimeSeconds: 5850,
-      startDateLocal: "2026-09-04T06:45:00Z",
-      averageSpeedKph: 40.0, // Foguete do Asfalto
-      activityType: "Outdoor",
-      isEligibleForRanking: true,
-    },
-  ];
-
-  const previousWeekDistance: AthleteHistoricalDistance[] = [
-    { athleteId: "ath-1", totalDistanceKm: 230 }, // João: 327 vs 230 (+42% - Maior Evolução!)
-    { athleteId: "ath-2", totalDistanceKm: 180 },
-    { athleteId: "ath-3", totalDistanceKm: 150 },
-  ];
-
-  const bulletin = compileGiroDaSemana({
-    weekNumber: 36,
-    year: 2026,
-    activities,
-    previousWeekDistance,
-    editorialNotes:
-      "Semana histórica de treinos para o Desafio da Serra! Destaque especial para o pelotão da madrugada e a incrível evolução no volume total do grupo.",
-  });
+  const bulletin = realGiroBulletin;
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
@@ -106,7 +29,9 @@ export default function GiroPage() {
         </Link>
         <div className="flex items-center gap-2">
           <a
-            href={`/api/og?type=podium&athlete=Jo%C3%A3o%20Silva&title=Rei%20da%20Dist%C3%A2ncia&metric=327%20km&format=stories&tier=Lenda`}
+            href={`/api/og?type=podium&athlete=${encodeURIComponent(
+              bulletin.reiDistancia.first?.athleteName || "Guilherme Bonald"
+            )}&title=Rei%20da%20Dist%C3%A2ncia&metric=${bulletin.totalDistanceKm}%20km&format=stories&tier=Lenda`}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-amber-500/10 cursor-pointer"
@@ -115,7 +40,9 @@ export default function GiroPage() {
             Gerar Card Stories
           </a>
           <a
-            href={`/api/og?type=podium&athlete=Jo%C3%A3o%20Silva&title=Rei%20da%20Dist%C3%A2ncia&metric=327%20km&format=feed&tier=Lenda`}
+            href={`/api/og?type=podium&athlete=${encodeURIComponent(
+              bulletin.reiDistancia.first?.athleteName || "Guilherme Bonald"
+            )}&title=Rei%20da%20Dist%C3%A2ncia&metric=${bulletin.totalDistanceKm}%20km&format=feed&tier=Lenda`}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"

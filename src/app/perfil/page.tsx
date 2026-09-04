@@ -1,4 +1,4 @@
-import { computeAthleteProfile, AthleteActivityRecord } from "@/lib/athlete-profile";
+import { realProfile } from "@/lib/real-data-provider";
 import {
   Trophy,
   Award,
@@ -14,52 +14,7 @@ import {
 import Link from "next/link";
 
 export default function PerfilPage() {
-  // Mock do ciclista autenticado atual
-  const activities: AthleteActivityRecord[] = [
-    {
-      id: "act-1",
-      name: "Desafio da Serra da Canastra 120k",
-      distanceMeters: 122000,
-      elevationGainMeters: 2650,
-      movingTimeSeconds: 16200,
-      startDateLocal: "2026-09-02T06:30:00Z",
-      averageSpeedKph: 27.1,
-      activityType: "Outdoor",
-      xpAwarded: 1475,
-    },
-    {
-      id: "act-2",
-      name: "Pelotão Noturno da Madrugada",
-      distanceMeters: 42000,
-      elevationGainMeters: 380,
-      movingTimeSeconds: 4800,
-      startDateLocal: "2026-08-30T02:15:00Z",
-      averageSpeedKph: 31.5,
-      activityType: "Outdoor",
-      xpAwarded: 458,
-    },
-    {
-      id: "act-3",
-      name: "Rolo Virtual Zwift Sweet Spot",
-      distanceMeters: 35000,
-      elevationGainMeters: 220,
-      movingTimeSeconds: 3600,
-      startDateLocal: "2026-08-28T19:00:00Z",
-      averageSpeedKph: 35.0,
-      activityType: "Virtual",
-      xpAwarded: 372,
-    },
-  ];
-
-  const profile = computeAthleteProfile({
-    athleteId: "ath-me",
-    firstname: "Guilherme",
-    lastname: "Bonald",
-    totalXp: 24850,
-    clubName: "Cabritos Cycling Club",
-    unlockedBadgeCodes: new Set(["century_100k", "vampire_secret"]),
-    activities,
-  });
+  const profile = realProfile;
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
@@ -100,9 +55,18 @@ export default function PerfilPage() {
       <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 p-1 flex items-center justify-center text-slate-950 font-black text-3xl shadow-xl shadow-amber-500/20">
-              {profile.fullName.slice(0, 2).toUpperCase()}
-            </div>
+            {profile.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatarUrl}
+                alt={profile.fullName}
+                className="w-20 h-20 rounded-2xl border-2 border-amber-500 object-cover shadow-xl shadow-amber-500/20"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 p-1 flex items-center justify-center text-slate-950 font-black text-3xl shadow-xl shadow-amber-500/20">
+                {profile.fullName.slice(0, 2).toUpperCase()}
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-black text-white">
@@ -110,6 +74,9 @@ export default function PerfilPage() {
                 </h1>
                 <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold">
                   {profile.levelInfo.tierName}
+                </span>
+                <span className="text-2xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                  Strava Conectado
                 </span>
               </div>
               <p className="text-sm text-slate-400 mt-1">{profile.clubName}</p>
@@ -131,7 +98,8 @@ export default function PerfilPage() {
                 XP Acumulado
               </div>
               <div className="text-2xl font-black text-white">
-                {profile.totalXp.toLocaleString("pt-BR")} <span className="text-xs text-amber-400 font-normal">XP</span>
+                {profile.totalXp.toLocaleString("pt-BR")}{" "}
+                <span className="text-xs text-amber-400 font-normal">XP</span>
               </div>
             </div>
           </div>
@@ -144,7 +112,8 @@ export default function PerfilPage() {
               Progresso para Nível {profile.levelInfo.level + 1}
             </span>
             <span className="text-amber-400 font-mono font-bold">
-              {profile.levelInfo.progressPercent}% ({profile.totalXp.toLocaleString("pt-BR")} / {profile.levelInfo.nextLevelXp.toLocaleString("pt-BR")} XP)
+              {profile.levelInfo.progressPercent}% ({profile.totalXp.toLocaleString("pt-BR")} /{" "}
+              {profile.levelInfo.nextLevelXp.toLocaleString("pt-BR")} XP)
             </span>
           </div>
           <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
@@ -160,7 +129,7 @@ export default function PerfilPage() {
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <Trophy className="w-5 h-5 text-amber-400" />
-          Estatísticas da Temporada
+          Estatísticas da Temporada 2026 (Strava Real)
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl">
@@ -169,7 +138,7 @@ export default function PerfilPage() {
               Distância Total
             </div>
             <div className="text-2xl font-black text-white">
-              {profile.seasonStats.totalDistanceKm}{" "}
+              {profile.seasonStats.totalDistanceKm.toLocaleString("pt-BR")}{" "}
               <span className="text-xs font-normal text-slate-400">km</span>
             </div>
           </div>
@@ -262,7 +231,7 @@ export default function PerfilPage() {
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <Calendar className="w-5 h-5 text-amber-400" />
-          Atividades Recentes
+          Atividades Reais ({profile.recentActivities.length} mais recentes)
         </h2>
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl divide-y divide-slate-800/60 overflow-hidden">
           {profile.recentActivities.map((act) => (
@@ -291,13 +260,13 @@ export default function PerfilPage() {
                 <div>
                   <div className="text-2xs text-slate-500 uppercase">Distância</div>
                   <div className="font-mono font-bold text-slate-200">
-                    {Math.round(act.distanceMeters / 1000)} km
+                    {(act.distanceMeters / 1000).toFixed(1)} km
                   </div>
                 </div>
                 <div>
                   <div className="text-2xs text-slate-500 uppercase">Altimetria</div>
                   <div className="font-mono font-bold text-slate-200">
-                    {act.elevationGainMeters} m
+                    {Math.round(act.elevationGainMeters)} m
                   </div>
                 </div>
                 <div>
