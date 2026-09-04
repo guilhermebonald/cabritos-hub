@@ -26,6 +26,7 @@ export default function RootLayout({
               <a href="/#corrida" className="hover:text-amber-400 transition">Corrida</a>
               <a href="/#rankings" className="hover:text-amber-400 transition">Rankings</a>
               <a href="/#desafios" className="hover:text-amber-400 transition">Desafios</a>
+              <a href="/mapa" className="hover:text-amber-400 transition">Mapa Coletivo</a>
               <a href="/giro" className="hover:text-amber-400 transition">Giro da Semana</a>
             </nav>
           </div>
