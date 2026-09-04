@@ -67,64 +67,41 @@ const athleteProfileActivities: AthleteActivityRecord[] = backfillResult.activit
   xpAwarded: act.xpAwarded,
 }));
 
-export const realProfile: AthleteProfileResult = computeAthleteProfile({
-  athleteId: String(realData.athlete.id),
-  firstname: realData.athlete.firstname,
-  lastname: realData.athlete.lastname,
-  totalXp: backfillResult.newTotalXp,
-  clubName: "CABRITOS RACE TEAM",
-  avatarUrl: realData.athlete.profile_medium || realData.athlete.profile,
-  unlockedBadgeCodes: new Set(backfillResult.unlockedBadges.map((b) => b.code)),
-  activities: athleteProfileActivities,
-});
+import { getCollectiveClubData, getAthleteProfileById } from "./club-store";
 
-// Converte atividades para o formato do mapa coletivo com rotas GPS reais
-export const realClubRoutes: CollectiveRoutesResult = aggregateClubRoutes(
-  rawActivities
-    .filter((a) => !!a.summary_polyline)
-    .map((a) => ({
-      id: String(a.id),
-      athleteName: `${realData.athlete.firstname} ${realData.athlete.lastname}`,
-      name: a.name,
-      distanceMeters: a.distance,
-      elevationGainMeters: a.total_elevation_gain,
-      summaryPolyline: a.summary_polyline,
-      activityType: a.type === "VirtualRide" ? "Virtual" : "Outdoor",
-    }))
-);
+export function getRealProfile() {
+  return getAthleteProfileById();
+}
 
-// Converte para rankings e corrida virtual
-export const realRankingActivities: ActivityRecord[] = backfillResult.activities.map((a) => ({
-  athleteId: String(realData.athlete.id),
-  athleteName: `${realData.athlete.firstname} ${realData.athlete.lastname}`,
-  distanceMeters: a.distanceMeters,
-  elevationGainMeters: a.elevationGainMeters,
-  movingTimeSeconds: a.movingTimeSeconds,
-  startDateLocal: a.startDateLocal,
-  isEligibleForRanking: a.isEligibleForRanking,
-  activityType: a.type,
-}));
+export function getRealCollectiveData() {
+  return getCollectiveClubData();
+}
 
-export const realWeeklyRankings = aggregateWeeklyRankings(realRankingActivities);
+// Proxies de leitura dinâmica para garantir avaliação a cada requisição sem congelar estado em memória
+export const realProfile = {
+  get value() {
+    return getAthleteProfileById();
+  },
+};
 
-// Giro da Semana real
-const giroActivities: GiroActivityInput[] = backfillResult.activities.map((a) => ({
-  id: String(a.stravaActivityId),
-  athleteId: String(realData.athlete.id),
-  athleteName: `${realData.athlete.firstname} ${realData.athlete.lastname}`,
-  distanceMeters: a.distanceMeters,
-  elevationGainMeters: a.elevationGainMeters,
-  movingTimeSeconds: a.movingTimeSeconds,
-  startDateLocal: a.startDateLocal,
-  averageSpeedKph: a.averageSpeedKph,
-  activityType: a.type,
-  isEligibleForRanking: a.isEligibleForRanking,
-}));
+export function getRealWeeklyRankings() {
+  return getCollectiveClubData().weeklyRankings;
+}
 
-export const realGiroBulletin = compileGiroDaSemana({
-  weekNumber: 36,
-  year: 2026,
-  activities: giroActivities,
-  previousWeekDistance: [{ athleteId: String(realData.athlete.id), totalDistanceKm: 180 }],
-  editorialNotes: "Dados reais da temporada sincronizados diretamente da conta oficial do Strava do Guilherme Bonald!",
-});
+export function getRealGiroBulletin() {
+  return getCollectiveClubData().giroBulletin;
+}
+
+export function getRealClubRoutes() {
+  return getCollectiveClubData().clubRoutes;
+}
+
+export function getRegisteredAthletes() {
+  return getCollectiveClubData().athletes;
+}
+
+export function getActiveCompetitionWeek() {
+  return getCollectiveClubData().activeWeek;
+}
+
+

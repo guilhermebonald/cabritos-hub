@@ -1,4 +1,4 @@
-import { realGiroBulletin } from "@/lib/real-data-provider";
+import { getRealGiroBulletin } from "@/lib/real-data-provider";
 import {
   Trophy,
   Mountain,
@@ -13,8 +13,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function GiroPage() {
-  const bulletin = realGiroBulletin;
+  const bulletin = getRealGiroBulletin();
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">

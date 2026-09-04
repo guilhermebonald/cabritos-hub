@@ -1,4 +1,4 @@
-import { realProfile } from "@/lib/real-data-provider";
+import { getRealProfile } from "@/lib/real-data-provider";
 import {
   Trophy,
   Award,
@@ -10,11 +10,61 @@ import {
   Calendar,
   ChevronLeft,
   Lock,
+  Trash2,
+  LogOut,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function PerfilPage() {
-  const profile = realProfile;
+  const profile = getRealProfile();
+
+  if (!profile) {
+    return (
+      <div className="space-y-8 max-w-3xl mx-auto pb-12 pt-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition font-medium"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Voltar ao Hub
+        </Link>
+
+        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto text-emerald-400">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-white">
+              Conta Desconectada & Dados Apagados
+            </h1>
+            <p className="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+              Você não possui nenhum perfil ou dado ativo no Cabritos Hub. Todas as suas atividades e pontuações foram removidas com sucesso.
+            </p>
+          </div>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href="/api/auth/strava"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-6 py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-amber-500/20 cursor-pointer"
+            >
+              <RotateCw className="w-4 h-4" />
+              Conectar com o Strava
+            </a>
+            <Link
+              href="/"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-200 px-6 py-3 rounded-xl text-sm font-semibold transition"
+            >
+              Ir para a Página Inicial
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
@@ -279,6 +329,28 @@ export default function PerfilPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Zona de Privacidade & Desconexão */}
+      <section className="bg-red-950/20 border border-red-900/40 rounded-3xl p-6 sm:p-8 space-y-4">
+        <div className="flex items-center gap-3 text-red-400">
+          <Trash2 className="w-5 h-5" />
+          <h3 className="font-bold text-white text-base">Gerenciamento de Dados & Privacidade</h3>
+        </div>
+        <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
+          Ao desconectar sua conta do Strava e apagar seus dados, todas as suas atividades sincronizadas,
+          pontos de XP e participação nos rankings do Cabritos Hub serão removidos permanentemente.
+        </p>
+        <form action="/api/auth/disconnect" method="POST" className="pt-2">
+          <input type="hidden" name="athleteId" value={profile.athleteId} />
+          <button
+            type="submit"
+            className="flex items-center gap-2 bg-red-600/90 hover:bg-red-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-lg shadow-red-900/30 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            Desconectar e Apagar Todos os Meus Dados
+          </button>
+        </form>
       </section>
     </div>
   );

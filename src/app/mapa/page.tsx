@@ -1,9 +1,11 @@
-import { realClubRoutes } from "@/lib/real-data-provider";
+import { getRealClubRoutes } from "@/lib/real-data-provider";
 import { MapPin, Mountain, Zap, Users, Compass, ChevronLeft, Share2, Layers } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function MapaPage() {
-  const mapData = realClubRoutes;
+  const mapData = getRealClubRoutes();
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
