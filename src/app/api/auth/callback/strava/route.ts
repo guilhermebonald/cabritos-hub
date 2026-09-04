@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
   }
 
   const clientId = process.env.STRAVA_CLIENT_ID || "177152";
-  const clientSecret = process.env.STRAVA_CLIENT_SECRET || "";
+  const clientSecret =
+    process.env.STRAVA_CLIENT_SECRET || "81a5990cb69dbf68512ed209da9c8344d64a6b32";
 
   try {
     const tokenData = await exchangeStravaToken({
