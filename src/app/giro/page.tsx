@@ -104,12 +104,25 @@ export default function GiroPage() {
           <ChevronLeft className="w-4 h-4" />
           Voltar ao Hub
         </Link>
-        <button
-          className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-        >
-          <Share2 className="w-3.5 h-3.5 text-amber-400" />
-          Compartilhar Giro
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/api/og?type=podium&athlete=Jo%C3%A3o%20Silva&title=Rei%20da%20Dist%C3%A2ncia&metric=327%20km&format=stories&tier=Lenda`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-amber-500/10 cursor-pointer"
+          >
+            <Share2 className="w-3.5 h-3.5 text-slate-950" />
+            Gerar Card Stories
+          </a>
+          <a
+            href={`/api/og?type=podium&athlete=Jo%C3%A3o%20Silva&title=Rei%20da%20Dist%C3%A2ncia&metric=327%20km&format=feed&tier=Lenda`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
+          >
+            Card Feed / Zap
+          </a>
+        </div>
       </div>
 
       {/* Headline & Edition Banner */}
