@@ -389,23 +389,37 @@ export default function HomePage() {
       </section>
 
       {/* Membros Pendentes - Convite Comunitário */}
-      <section className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
-            <Users className="w-6 h-6" />
+      <section className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white">Chame a galera do clube!</h3>
+              <p className="text-sm text-slate-400">
+                4 de 18 ciclistas conectados. Veja quem ainda não ativou e mande o link no WhatsApp!
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-white">Chame a galera do clube!</h3>
-            <p className="text-sm text-slate-400">
-              Ainda há 14 ciclistas no clube Strava que não ativaram o Cabritos Hub.
-            </p>
-          </div>
+          <button
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/10 cursor-pointer text-sm"
+          >
+            Copiar Link de Convite
+          </button>
         </div>
-        <button
-          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/10 cursor-pointer"
-        >
-          Copiar Link de Convite
-        </button>
+
+        <div className="pt-2 border-t border-slate-800/60 flex flex-wrap gap-2">
+          {["Rodrigo M.", "Felipe B.", "Lucas G.", "Marcelo P.", "Bruno R."].map((name) => (
+            <span
+              key={name}
+              className="text-xs bg-slate-950 border border-slate-800 text-slate-400 px-3 py-1 rounded-full flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50" />
+              {name} (Pendente)
+            </span>
+          ))}
+        </div>
       </section>
     </div>
   );
