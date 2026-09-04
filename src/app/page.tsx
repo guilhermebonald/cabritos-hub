@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { Zap, Mountain, Flame, ArrowRight, Sparkles, Trophy, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { BillyMascot } from "@/components/billy-mascot";
+import { CabritosLogo } from "@/components/cabritos-logo";
 import { GameCard, GameButton } from "@/components/game-ui";
 import { AuthStatusBanner } from "@/components/auth-status-banner";
 import { Suspense } from "react";
@@ -119,18 +120,18 @@ export default async function HomePage() {
           </div>
         </GameCard>
       ) : (
-        /* Onboarding Divertido com Bode Billy */
+        /* Onboarding Divertido com Logo 3D Oficial */
         <GameCard color="amber" className="relative overflow-hidden">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-              <BillyMascot mood="cheering" size="lg" />
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+              <CabritosLogo size="xl" className="shrink-0" />
               <div className="space-y-1 max-w-lg">
                 <div className="inline-flex items-center gap-1 text-2xs font-black uppercase tracking-widest text-amber-700 bg-amber-200/80 px-2.5 py-1 rounded-full">
                   <Sparkles className="w-3 h-3" />
                   Temporada Ativa
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
-                  Bode Billy convoca o Pelotão!
+                  Pelotão Cabritos Race Team
                 </h1>
                 <p className="text-xs sm:text-sm font-semibold text-slate-600">
                   Conecte seu Strava para ganhar XP, disputar a corrida semanal e colecionar medalhas no clube.

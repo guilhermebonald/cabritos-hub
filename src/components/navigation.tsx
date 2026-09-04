@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Compass, Flag, Trophy, User } from "lucide-react";
+import { CabritosLogo } from "@/components/cabritos-logo";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -62,9 +63,7 @@ export function DesktopHeader() {
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b-2 border-slate-200">
       <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 border-b-4 rounded-2xl flex items-center justify-center text-2xl shadow-sm transition-transform group-hover:rotate-6">
-            🐐
-          </div>
+          <CabritosLogo size="md" className="group-hover:scale-105 transition-transform" />
           <div>
             <div className="font-black text-xl tracking-tight text-slate-900 leading-none">
               CABRITOS

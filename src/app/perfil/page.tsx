@@ -2,6 +2,7 @@ import { getRealProfile } from "@/lib/real-data-provider";
 import { cookies } from "next/headers";
 import { GameCard, GameButton } from "@/components/game-ui";
 import { BillyMascot } from "@/components/billy-mascot";
+import { CabritosLogo } from "@/components/cabritos-logo";
 import { Trophy, Award, Zap, Mountain, Clock, Lock, LogOut, CheckCircle2, RotateCw } from "lucide-react";
 import Link from "next/link";
 import { AuthStatusBanner } from "@/components/auth-status-banner";
@@ -35,7 +36,7 @@ export default async function PerfilPage() {
           <AuthStatusBanner />
         </Suspense>
         <GameCard color="amber" className="text-center space-y-6">
-          <BillyMascot mood="cheering" size="lg" className="mx-auto" />
+          <CabritosLogo size="xl" className="mx-auto" />
           <div className="space-y-2">
             <h1 className="text-2xl font-black text-slate-900">
               Nenhum Ciclista Conectado
@@ -70,9 +71,7 @@ export default async function PerfilPage() {
                 className="w-24 h-24 rounded-3xl border-4 border-white shadow-md object-cover"
               />
             ) : (
-              <div className="w-24 h-24 rounded-3xl bg-amber-400 border-4 border-white flex items-center justify-center text-4xl shadow-md">
-                🐐
-              </div>
+              <CabritosLogo size="lg" />
             )}
             <div>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
